@@ -1,0 +1,83 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Tour;
+use App\Models\Itinerary;
+use App\Models\SeoMeta;
+
+class TourController extends Controller
+{
+
+    public function index()
+    {
+        $tours = \App\Models\Tour::with(['itineraries', 'seoMeta'])->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $tours
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        
+        // upload banner
+        $banner = null;
+
+        if ($request->hasFile('main_banner')) {
+
+            $banner = time().'_'.$request->main_banner->getClientOriginalName();
+
+            $request->main_banner->move(public_path('uploads/tours'), $banner);
+        }
+
+        // create tour
+        $tour = Tour::create([
+
+            'title' => $request->title,
+            'description' => $request->description,
+            'category' => $request->category,
+            'status' => $request->status,
+            'location' => $request->location,
+            'highlights' => $request->highlights,
+            'inclusions' => $request->inclusions,
+            'base_price' => $request->base_price,
+            'offer_price' => $request->offer_price,
+            'taxes' => $request->taxes,
+            'total_seats' => $request->total_seats,
+            'main_banner' => $banner,
+        ]);
+
+        // save itineraries
+        if ($request->itineraries) {
+
+            foreach ($request->itineraries as $item) {
+
+                Itinerary::create([
+                    'tour_id' => $tour->id,
+                    'itinerary_title' => $item['itinerary_title'],
+                    'description' => $item['description'],
+                    'image' => $item['image'] ?? null,
+                ]);
+            }
+        }
+
+        // save seo meta
+        if ($request->seo_meta) {
+
+            SeoMeta::create([
+                'tour_id' => $tour->id,
+                'title' => $request->seo_meta['title'],
+                'desc' => $request->seo_meta['desc'],
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Tour created successfully',
+            'data' => $tour
+        ]);
+    }
+}

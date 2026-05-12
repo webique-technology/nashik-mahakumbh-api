@@ -80,4 +80,21 @@ class TourController extends Controller
             'data' => $tour
         ]);
     }
+
+    public function show($id)
+    {
+        $tour = \App\Models\Tour::with(['itineraries', 'seoMeta'])->find($id);
+
+        if (!$tour) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Tour not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => $tour
+        ]);
+    }
 }

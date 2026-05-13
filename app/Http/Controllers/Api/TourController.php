@@ -13,7 +13,8 @@ class TourController extends Controller
 
     public function index()
     {
-        $tours = \App\Models\Tour::with(['itineraries', 'seoMeta'])->get();
+        // $tours = \App\Models\Tour::with(['itineraries', 'seoMeta'])->get();
+        $tours = \App\Models\Tour::with(['itineraries', 'seoMeta'])->paginate(10);
 
         return response()->json([
             'status' => true,

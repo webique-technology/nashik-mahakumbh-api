@@ -9,9 +9,16 @@ use App\Models\Vehicle;
 class VehicleController extends Controller
 {
     
-    public function index()
+    public function index(Request $request)
     {
-        $vehicles = Vehicle::all();
+        $query = Vehicle::query();
+
+        if ($request->category) {
+            $query->where('category', $request->category);
+        }
+
+        $vehicles = $query->paginate(10);
+        // $vehicles = Vehicle::all();
 
         return response()->json([
             'status' => true,

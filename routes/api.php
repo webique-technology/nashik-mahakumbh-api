@@ -15,6 +15,7 @@ Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/tours', [TourController::class, 'store']);
 Route::get('/tours', [TourController::class, 'index']);
 Route::get('/tours/{id}', [TourController::class, 'show']);
+Route::post('/tours/{id}', [TourController::class, 'update']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', function (\Illuminate\Http\Request $request) {

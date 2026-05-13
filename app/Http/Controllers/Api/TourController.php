@@ -97,4 +97,78 @@ class TourController extends Controller
             'data' => $tour
         ]);
     }
+    public function update(Request $request, $id)
+    {
+        $tour = Tour::find($id);
+
+        if (!$tour) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Tour not found'
+            ], 404);
+        }
+
+        // upload new banner if exists
+        if ($request->hasFile('main_banner')) {
+
+            $banner = time().'_'.$request->main_banner->getClientOriginalName();
+
+            $request->main_banner->move(public_path('uploads/tours'), $banner);
+
+            $tour->main_banner = $banner;
+        }
+
+        // update tour
+        $tour->title = $request->title;
+        $tour->description = $request->description;
+        $tour->category = $request->category;
+        $tour->status = $request->status;
+        $tour->location = $request->location;
+
+        $tour->highlights = $request->highlights;
+
+        $tour->inclusions = $request->inclusions;
+
+        $tour->base_price = $request->base_price;
+        $tour->offer_price = $request->offer_price;
+        $tour->taxes = $request->taxes;
+        $tour->total_seats = $request->total_seats;
+
+        $tour->save();
+
+        // update itineraries
+        if ($request->itineraries) {
+
+            // delete old itineraries
+            Itinerary::where('tour_id', $tour->id)->delete();
+
+            foreach ($request->itineraries as $item) {
+
+                Itinerary::create([
+                    'tour_id' => $tour->id,
+                    'itinerary_title' => $item['itinerary_title'],
+                    'description' => $item['description'],
+                    'image' => $item['image'] ?? null,
+                ]);
+            }
+        }
+
+        // update seo meta
+        if ($request->seo_meta) {
+
+            SeoMeta::updateOrCreate(
+                ['tour_id' => $tour->id],
+                [
+                    'title' => $request->seo_meta['title'],
+                    'desc' => $request->seo_meta['desc'],
+                ]
+            );
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Tour updated successfully',
+            'data' => $tour
+        ]);
+    }
 }

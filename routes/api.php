@@ -16,6 +16,7 @@ Route::post('/tours', [TourController::class, 'store']);
 Route::get('/tours', [TourController::class, 'index']);
 Route::get('/tours/{id}', [TourController::class, 'show']);
 Route::post('/tours/{id}', [TourController::class, 'update']);
+Route::delete('/tours/{id}', [TourController::class, 'destroy']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', function (\Illuminate\Http\Request $request) {

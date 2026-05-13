@@ -24,6 +24,22 @@ class TourController extends Controller
     public function store(Request $request)
     {
         
+        $request->validate([
+
+            'title' => 'required|string|max:255',
+            'description' => 'required',
+            'category' => 'required|string',
+            'status' => 'required',
+            'location' => 'required',
+            'base_price' => 'required|numeric',
+            'offer_price' => 'nullable|numeric',
+            'taxes' => 'nullable|numeric',
+            'total_seats' => 'required|integer',
+            'main_banner' => 'nullable|image|mimes:jpg,jpeg,png,webp',
+            'highlights' => 'nullable|array',
+            'inclusions' => 'nullable|array',
+        ]);
+
         // upload banner
         $banner = null;
 
@@ -41,26 +57,37 @@ class TourController extends Controller
             'description' => $request->description,
             'category' => $request->category,
             'status' => $request->status,
-            'location' => $request->location,
-            'highlights' => $request->highlights,
-            'inclusions' => $request->inclusions,
-            'base_price' => $request->base_price,
-            'offer_price' => $request->offer_price,
-            'taxes' => $request->taxes,
-            'total_seats' => $request->total_seats,
-            'main_banner' => $banner,
+            'location' => $request->location ?? '',
+            'highlights' => $request->highlights ?? [],
+            'inclusions' => $request->inclusions ?? [],
+            'base_price' => $request->base_price ,
+            'offer_price' => $request->offer_price ?? '',
+            'taxes' => $request->taxes ?? '',
+            'total_seats' => $request->total_seats ?? '',
+            'main_banner' => $banner ?? '',
         ]);
 
-        // save itineraries
+        // // save itineraries
         if ($request->itineraries) {
 
-            foreach ($request->itineraries as $item) {
+            foreach ($request->itineraries as $index => $item) {
+
+                $imageName = null;
+
+                if ($request->hasFile("itineraries.$index.image")) {
+
+                    $file = $request->file("itineraries.$index.image");
+
+                    $imageName = time().'_'.$file->getClientOriginalName();
+
+                    $file->move(public_path('uploads/itineraries'), $imageName);
+                }
 
                 Itinerary::create([
                     'tour_id' => $tour->id,
                     'itinerary_title' => $item['itinerary_title'],
                     'description' => $item['description'],
-                    'image' => $item['image'] ?? null,
+                    'image' => $imageName,
                 ]);
             }
         }
@@ -99,6 +126,21 @@ class TourController extends Controller
     }
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'title' => 'sometimes|string|max:255',
+            'description' => 'sometimes',
+            'category' => 'sometimes|string',
+            'status' => 'sometimes',
+            'location' => 'sometimes',
+            'base_price' => 'sometimes|numeric',
+            'offer_price' => 'nullable|numeric',
+            'taxes' => 'nullable|numeric',
+            'total_seats' => 'sometimes|integer',
+            'main_banner' => 'nullable|image|mimes:jpg,jpeg,png,webp',
+            'highlights' => 'nullable|array',
+            'inclusions' => 'nullable|array',
+        ]);
+
         $tour = Tour::find($id);
 
         if (!$tour) {
@@ -108,52 +150,75 @@ class TourController extends Controller
             ], 404);
         }
 
-        // upload new banner if exists
         if ($request->hasFile('main_banner')) {
 
             $banner = time().'_'.$request->main_banner->getClientOriginalName();
-
             $request->main_banner->move(public_path('uploads/tours'), $banner);
-
             $tour->main_banner = $banner;
         }
 
-        // update tour
-        $tour->title = $request->title;
-        $tour->description = $request->description;
-        $tour->category = $request->category;
-        $tour->status = $request->status;
-        $tour->location = $request->location;
+        $tour->update($request->only([
+            'title',
+            'description',
+            'category',
+            'status',
+            'location',
+            'base_price',
+            'offer_price',
+            'taxes',
+            'total_seats',
+        ]));
 
-        $tour->highlights = $request->highlights;
+        if ($request->has('highlights')) {
+            $tour->highlights = $request->highlights;
+        }
 
-        $tour->inclusions = $request->inclusions;
+        if ($request->has('inclusions')) {
+            $tour->inclusions = $request->inclusions;
+        }
 
-        $tour->base_price = $request->base_price;
-        $tour->offer_price = $request->offer_price;
-        $tour->taxes = $request->taxes;
-        $tour->total_seats = $request->total_seats;
 
         $tour->save();
 
-        // update itineraries
         if ($request->itineraries) {
 
-            // delete old itineraries
+            // Get old itineraries
+            $oldItineraries = Itinerary::where('tour_id', $tour->id)->get();
+
+            // Delete old images safely
+            foreach ($oldItineraries as $old) {
+                if (!empty($old->image)) {
+                    $this->deleteFile('uploads/itineraries/' . $old->image);
+                }
+            }
+
+            // Delete old DB records
             Itinerary::where('tour_id', $tour->id)->delete();
 
-            foreach ($request->itineraries as $item) {
+            // Insert new itineraries
+            foreach ($request->itineraries as $index => $item) {
+
+                $imageName = null;
+
+                // Check if new image uploaded
+                if ($request->hasFile("itineraries.$index.image")) {
+
+                    $file = $request->file("itineraries.$index.image");
+
+                    $imageName = time().'_'.$file->getClientOriginalName();
+
+                    $file->move(public_path('uploads/itineraries'), $imageName);
+                }
 
                 Itinerary::create([
                     'tour_id' => $tour->id,
                     'itinerary_title' => $item['itinerary_title'],
                     'description' => $item['description'],
-                    'image' => $item['image'] ?? null,
+                    'image' => $imageName, // null if not uploaded
                 ]);
             }
         }
 
-        // update seo meta
         if ($request->seo_meta) {
 
             SeoMeta::updateOrCreate(
@@ -169,6 +234,59 @@ class TourController extends Controller
             'status' => true,
             'message' => 'Tour updated successfully',
             'data' => $tour
+        ]);
+    }
+
+    // public function destroy($id)
+    // {
+    //     $tour = Tour::find($id);
+
+    //     if (!$tour) {
+
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Tour not found'
+    //         ], 404);
+    //     }
+
+    //     if ($tour->main_banner &&
+    //         file_exists(public_path('uploads/tours/' . $tour->main_banner))) {
+
+    //         unlink(public_path('uploads/tours/' . $tour->main_banner));
+    //     }
+
+    //     $tour->delete();
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'message' => 'Tour deleted successfully'
+    //     ]);
+    // }
+    private function deleteFile($path)
+    {
+        if ($path && file_exists(public_path($path))) {
+            unlink(public_path($path));
+        }
+    }
+
+    public function destroy($id)
+    {
+        $tour = Tour::with('itineraries')->find($id);
+
+        if (!$tour) {
+            return response()->json(['status' => false,'message' => 'Tour not found'], 404);
+        }
+
+        $this->deleteFile('uploads/tours/' . $tour->main_banner);
+
+        foreach ($tour->itineraries as $itinerary) {
+            $this->deleteFile('uploads/itineraries/' . $itinerary->image);
+        }
+
+        $tour->delete();
+
+        return response()->json([
+            'message' => 'Tour deleted successfully'
         ]);
     }
 }

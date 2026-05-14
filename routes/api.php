@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AdminAuthController;
 use App\Http\Controllers\Api\TourController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\HotelController;
+use App\Http\Controllers\Api\BlogController;
 
 Route::get('/test', function () {
     return response()->json([
@@ -31,6 +32,13 @@ Route::get('/hotels/{id}', [HotelController::class, 'show']);
 Route::post('/hotels', [HotelController::class, 'store']);
 Route::post('/hotels/{id}', [HotelController::class, 'update']);
 Route::delete('/hotels/{id}', [HotelController::class, 'destroy']);
+
+Route::get('/blogs', [BlogController::class, 'index']);
+Route::get('/blogs/{id}', [BlogController::class, 'show']);
+Route::post('/blogs', [BlogController::class, 'store']);
+Route::post('/blogs/{id}', [BlogController::class, 'update']);
+Route::delete('/blogs/{id}', [BlogController::class, 'destroy']);
+
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', function (\Illuminate\Http\Request $request) {

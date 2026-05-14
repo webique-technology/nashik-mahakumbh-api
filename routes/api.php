@@ -3,6 +3,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AdminAuthController;
 use App\Http\Controllers\Api\TourController;
 use App\Http\Controllers\Api\VehicleController;
+use App\Http\Controllers\Api\HotelController;
 
 Route::get('/test', function () {
     return response()->json([
@@ -24,6 +25,12 @@ Route::get('/vehicles/{id}', [VehicleController::class, 'show']);
 Route::post('/vehicles', [VehicleController::class, 'store']);
 Route::post('/vehicles/{id}', [VehicleController::class, 'update']);
 Route::delete('/vehicles/{id}', [VehicleController::class, 'destroy']);
+
+Route::get('/hotels', [HotelController::class, 'index']);
+Route::get('/hotels/{id}', [HotelController::class, 'show']);
+Route::post('/hotels', [HotelController::class, 'store']);
+Route::post('/hotels/{id}', [HotelController::class, 'update']);
+Route::delete('/hotels/{id}', [HotelController::class, 'destroy']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', function (\Illuminate\Http\Request $request) {

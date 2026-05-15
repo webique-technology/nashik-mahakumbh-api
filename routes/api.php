@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\TourController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\HotelController;
 use App\Http\Controllers\Api\BlogController;
+use App\Http\Controllers\Api\PolicyController;
 
 Route::get('/test', function () {
     return response()->json([
@@ -38,6 +39,14 @@ Route::get('/blogs/{id}', [BlogController::class, 'show']);
 Route::post('/blogs', [BlogController::class, 'store']);
 Route::post('/blogs/{id}', [BlogController::class, 'update']);
 Route::delete('/blogs/{id}', [BlogController::class, 'destroy']);
+
+// Privacy Policy
+Route::post('/privacy-policy', [PolicyController::class, 'savePrivacyPolicy']);
+Route::get('/privacy-policy', [PolicyController::class, 'getPrivacyPolicy']);
+
+// Payment Policy
+Route::post('/payment-policy', [PolicyController::class, 'savePaymentPolicy']);
+Route::get('/payment-policy', [PolicyController::class, 'getPaymentPolicy']);
 
 
 Route::middleware('auth:sanctum')->group(function () {

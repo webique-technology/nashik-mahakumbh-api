@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\HotelController;
 use App\Http\Controllers\Api\BlogController;
 use App\Http\Controllers\Api\PolicyController;
+use App\Http\Controllers\Api\SliderController;
 
 Route::get('/test', function () {
     return response()->json([
@@ -47,6 +48,13 @@ Route::get('/privacy-policy', [PolicyController::class, 'getPrivacyPolicy']);
 // Payment Policy
 Route::post('/payment-policy', [PolicyController::class, 'savePaymentPolicy']);
 Route::get('/payment-policy', [PolicyController::class, 'getPaymentPolicy']);
+
+
+Route::get('/sliders', [SliderController::class, 'index']);
+Route::post('/sliders', [SliderController::class, 'store']);
+Route::get('/sliders/{id}', [SliderController::class, 'show']);
+Route::post('/sliders/{id}', [SliderController::class, 'update']);
+Route::delete('/sliders/{id}', [SliderController::class, 'destroy']);
 
 
 Route::middleware('auth:sanctum')->group(function () {

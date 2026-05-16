@@ -19,11 +19,18 @@ class SliderController extends Controller
                     //     $slider->banner_image = asset('uploads/sliders/'.$slider->banner_image);
                     // }
 
+        // return response()->json([
+        //     'success' => true,
+        //     'message' => 'Slider list fetched successfully',
+        //     'data' => $sliders
+        // ], 200);
+
+
         return response()->json([
             'success' => true,
-            'message' => 'Slider list fetched successfully',
+            'message' => __('messages.slider_list'),
             'data' => $sliders
-        ], 200);
+        ]);
     }
 
 

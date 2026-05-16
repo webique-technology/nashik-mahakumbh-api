@@ -42,7 +42,7 @@ class BlogController extends Controller
 
             'title' => 'required|string|max:255',
             'description' => 'required',
-            'category' => 'required|string',
+            'category' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp',
         ]);
 

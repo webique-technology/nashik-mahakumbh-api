@@ -50,11 +50,19 @@ Route::post('/payment-policy', [PolicyController::class, 'savePaymentPolicy']);
 Route::get('/payment-policy', [PolicyController::class, 'getPaymentPolicy']);
 
 
-Route::get('/sliders', [SliderController::class, 'index']);
+// Route::get('/sliders', [SliderController::class, 'index']);
 Route::post('/sliders', [SliderController::class, 'store']);
 Route::get('/sliders/{id}', [SliderController::class, 'show']);
 Route::post('/sliders/{id}', [SliderController::class, 'update']);
 Route::delete('/sliders/{id}', [SliderController::class, 'destroy']);
+
+
+Route::middleware('api.language')->group(function () {
+
+    Route::get('/sliders', [SliderController::class, 'index']);
+
+});
+
 
 
 Route::middleware('auth:sanctum')->group(function () {

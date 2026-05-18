@@ -29,6 +29,11 @@ class BlogController extends Controller
 
         $blogs = $query->paginate(10);
 
+        $blogs->getCollection()->transform(function ($blog) {
+            $blog->image_url = $blog->image ? asset('uploads/blogs/' . $blog->image) : null;
+            return $blog;
+        });
+
         return response()->json([
             'status' => true,
             'message' => 'Blogs fetched successfully',
@@ -84,6 +89,10 @@ class BlogController extends Controller
                 'message' => 'Blog not found'
             ], 404);
         }
+        
+        $blog->image_url = $blog->image
+        ? asset('uploads/blogs/' . $blog->image)
+        : null;
 
         return response()->json([
             'status' => true,

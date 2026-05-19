@@ -16,6 +16,23 @@ class TourController extends Controller
         // $tours = \App\Models\Tour::with(['itineraries', 'seoMeta'])->get();
         $tours = \App\Models\Tour::with(['itineraries', 'seoMeta'])->paginate(10);
 
+        // $tours->getCollection()->transform(function ($tour) {
+        //     $tour->image_url = $tour->main_banner ? asset('uploads/tours/' . $tour->main_banner) : null;
+        //     return $tour;
+        // });
+
+        $tours->getCollection()->transform(function ($tour) {
+            // Main banner image
+            $tour->image_url = $tour->main_banner ? asset('uploads/tours/' . $tour->main_banner) : null;
+            // Itinerary images
+            $tour->itineraries->transform(function ($itinerary) {
+                $itinerary->itineraries_image_url = $itinerary->image ? asset('uploads/itineraries/' . $itinerary->image) : null;
+                return $itinerary;
+            });
+
+            return $tour;
+        });
+
         return response()->json([
             'status' => true,
             'data' => $tours

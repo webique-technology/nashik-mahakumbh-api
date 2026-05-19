@@ -16,10 +16,13 @@ class VehicleController extends Controller
         if ($request->category) {
             $query->where('category', $request->category);
         }
-
+        $query->orderBy('id', 'desc');
         $vehicles = $query->paginate(10);
         // $vehicles = Vehicle::all();
-
+         $vehicles->getCollection()->transform(function ($vehicle) {
+            $vehicle->car_image_url  = $vehicle->car_image ? asset('uploads/vehicles/' . $vehicle->car_image) : null;
+            return $vehicle;
+        });
         return response()->json([
             'status' => true,
             'data' => $vehicles
@@ -79,6 +82,9 @@ class VehicleController extends Controller
                 'message' => 'Vehicle not found'
             ], 404);
         }
+          $vehicle->car_image_url = $vehicle->car_image
+            ? asset('uploads/vehicles/' . $vehicle->car_image)
+            : null;
 
         return response()->json([
             'status' => true,

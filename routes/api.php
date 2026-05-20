@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\HotelController;
 use App\Http\Controllers\Api\BlogController;
 use App\Http\Controllers\Api\PolicyController;
 use App\Http\Controllers\Api\SliderController;
+use App\Http\Controllers\Api\TourEnquiryController;
 
 Route::get('/test', function () {
     return response()->json([
@@ -55,6 +56,11 @@ Route::post('/sliders', [SliderController::class, 'store']);
 Route::get('/sliders/{id}', [SliderController::class, 'show']);
 Route::post('/sliders/{id}', [SliderController::class, 'update']);
 Route::delete('/sliders/{id}', [SliderController::class, 'destroy']);
+
+Route::get('/tour-enquiries', [TourEnquiryController::class, 'index']);
+Route::post('/tour-enquiries', [TourEnquiryController::class, 'store']);
+Route::get('/tour-enquiries/{id}', [TourEnquiryController::class, 'show']);
+Route::delete('/tour-enquiries/{id}', [TourEnquiryController::class, 'destroy']);
 
 
 Route::middleware('api.language')->group(function () {

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\BlogController;
 use App\Http\Controllers\Api\PolicyController;
 use App\Http\Controllers\Api\SliderController;
 use App\Http\Controllers\Api\TourEnquiryController;
+use App\Http\Controllers\Api\ContactUsController;
 
 Route::get('/test', function () {
     return response()->json([
@@ -61,6 +62,12 @@ Route::get('/tour-enquiries', [TourEnquiryController::class, 'index']);
 Route::post('/tour-enquiries', [TourEnquiryController::class, 'store']);
 Route::get('/tour-enquiries/{id}', [TourEnquiryController::class, 'show']);
 Route::delete('/tour-enquiries/{id}', [TourEnquiryController::class, 'destroy']);
+
+
+Route::post('/contact-us', [ContactUsController::class, 'store']);
+Route::get('/contact-us', [ContactUsController::class, 'index']);
+// Route::get('/contact-us/{id}', [ContactUsController::class, 'show']);
+// Route::delete('/contact-us/{id}', [ContactUsController::class, 'destroy']);
 
 
 Route::middleware('api.language')->group(function () {

@@ -31,10 +31,27 @@ class HotelController extends Controller
 
         $hotels = $query->paginate(10);
 
+        // $hotels->getCollection()->transform(function ($hotel) {
+
+        //     $hotel->image_url = !empty($hotel->images[0])
+        //         ? asset('uploads/hotels/' . $hotel->images[0])
+        //         : null;
+
+        //     return $hotel;
+        // });
+
         $hotels->getCollection()->transform(function ($hotel) {
 
+            // convert all images into full URLs
+            $hotel->images = collect($hotel->images)->map(function ($image) {
+
+                return asset('uploads/hotels/' . $image);
+
+            });
+
+            // first image
             $hotel->image_url = !empty($hotel->images[0])
-                ? asset('uploads/hotels/' . $hotel->images[0])
+                ? $hotel->images[0]
                 : null;
 
             return $hotel;

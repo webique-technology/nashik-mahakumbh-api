@@ -31,6 +31,15 @@ class HotelController extends Controller
 
         $hotels = $query->paginate(10);
 
+        $hotels->getCollection()->transform(function ($hotel) {
+
+            $hotel->image_url = !empty($hotel->images[0])
+                ? asset('uploads/hotels/' . $hotel->images[0])
+                : null;
+
+            return $hotel;
+        });
+
         return response()->json([
             'status' => true,
             'message' => 'Hotels fetched successfully',
@@ -105,6 +114,10 @@ class HotelController extends Controller
                 'message' => 'Hotel not found'
             ], 404);
         }
+
+        $hotel->images = collect($hotel->images)->map(function ($image) {
+            return asset('uploads/hotels/' . $image);
+        });
 
         return response()->json([
             'status' => true,

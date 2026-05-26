@@ -59,7 +59,7 @@ class TourEnquiryController extends Controller
             'full_name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone_number' => 'required|string|max:20',
-            'number_of_travelers' => 'required|integer|min:1',
+            'number_of_travelers' => 'required',
             'preferred_dates' => 'nullable|string|max:255',
             'tour_id' => 'required|exists:tours,id',
             'special_requirements' => 'nullable|string',

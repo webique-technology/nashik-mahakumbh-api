@@ -25,10 +25,15 @@ class TourController extends Controller
             // Main banner image
             $tour->image_url = $tour->main_banner ? asset('uploads/tours/' . $tour->main_banner) : null;
             // Itinerary images
-            $tour->itineraries->transform(function ($itinerary) {
-                $itinerary->itineraries_image_url = $itinerary->image ? asset('uploads/itineraries/' . $itinerary->image) : null;
-                return $itinerary;
-            });
+            // $tour->itineraries->transform(function ($itinerary) {
+            //     $itinerary->itineraries_image_url = $itinerary->image ? asset('uploads/itineraries/' . $itinerary->image) : null;
+            //     return $itinerary;
+            // });
+             $tour->itineraries->transform(function ($itinerary) {
+             $itinerary->itineraries_image_url = $itinerary->image ? '/uploads/itineraries/' . $itinerary->image: null;
+
+        return $itinerary;
+    });
 
             return $tour;
         });

@@ -13,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware) {
+    ->withMiddleware(function (Middleware $middleware) {    
         $middleware->web(append: [
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
@@ -26,6 +26,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'api.language' => \App\Http\Middleware\ApiLanguageMiddleware::class,
         ]);
+        $middleware->validateCsrfTokens(
+        except: [
+            'api/tour-enquiries',
+        ]
+    );
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

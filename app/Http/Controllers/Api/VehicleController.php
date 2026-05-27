@@ -20,7 +20,8 @@ class VehicleController extends Controller
         $vehicles = $query->paginate(10);
         // $vehicles = Vehicle::all();
          $vehicles->getCollection()->transform(function ($vehicle) {
-            $vehicle->car_image_url  = $vehicle->car_image ? asset('uploads/vehicles/' . $vehicle->car_image) : null;
+            // $vehicle->car_image_url  = $vehicle->car_image ? asset('uploads/vehicles/' . $vehicle->car_image) : null;
+            $vehicle->car_image_url = $vehicle->car_image ? '/uploads/vehicles/' . $vehicle->car_image: null;
             return $vehicle;
         });
         return response()->json([

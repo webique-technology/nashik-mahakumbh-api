@@ -11,32 +11,59 @@ use App\Models\SeoMeta;
 class TourController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        // $tours = \App\Models\Tour::with(['itineraries', 'seoMeta'])->get();
-        $tours = \App\Models\Tour::with(['itineraries', 'seoMeta'])->paginate(10);
+        // $tours = \App\Models\Tour::with(['itineraries', 'seoMeta'])->paginate(10);
+        $query = \App\Models\Tour::with(['itineraries', 'seoMeta']);
 
-        // $tours->getCollection()->transform(function ($tour) {
-        //     $tour->image_url = $tour->main_banner ? asset('uploads/tours/' . $tour->main_banner) : null;
-        //     return $tour;
-        // });
+            // Search by title
+            if ($request->filled('name')) {
+                $query->where('title', 'LIKE', '%' . $request->name . '%');
+            }
 
-        $tours->getCollection()->transform(function ($tour) {
-            // Main banner image
-            $tour->image_url = $tour->main_banner ? asset('uploads/tours/' . $tour->main_banner) : null;
-            // Itinerary images
-            // $tour->itineraries->transform(function ($itinerary) {
-            //     $itinerary->itineraries_image_url = $itinerary->image ? asset('uploads/itineraries/' . $itinerary->image) : null;
-            //     return $itinerary;
-            // });
-             $tour->itineraries->transform(function ($itinerary) {
-             $itinerary->itineraries_image_url = $itinerary->image ? '/uploads/itineraries/' . $itinerary->image: null;
+            // Filter by category
+            if ($request->filled('category')) {
+                $query->where('category', $request->category);
+            }
 
-        return $itinerary;
-    });
+            // Filter by price range
+            if ($request->filled('price')) {
 
-            return $tour;
-        });
+                if ($request->price == 'below_5000') {
+
+                    $query->where('base_price', '<', 5000);
+
+                } elseif ($request->price == '5000_15000') {
+
+                    $query->whereBetween('base_price', [5000, 15000]);
+
+                } elseif ($request->price == 'above_15000') {
+
+                    $query->where('base_price', '>', 15000);
+                }
+            }
+
+            $query->latest();
+
+            $tours = $query->paginate(9);
+            
+
+            $tours->getCollection()->transform(function ($tour) {
+                // Main banner image
+                $tour->image_url = $tour->main_banner ? asset('uploads/tours/' . $tour->main_banner) : null;
+                // Itinerary images
+                // $tour->itineraries->transform(function ($itinerary) {
+                //     $itinerary->itineraries_image_url = $itinerary->image ? asset('uploads/itineraries/' . $itinerary->image) : null;
+                //     return $itinerary;
+                // });
+                $tour->itineraries->transform(function ($itinerary) {
+                    $itinerary->itineraries_image_url = $itinerary->image ? '/uploads/itineraries/' . $itinerary->image: null;
+
+                    return $itinerary;
+                });
+
+                return $tour;
+            });
 
         return response()->json([
             'status' => true,

@@ -12,7 +12,7 @@ class Vehicle extends Model
         'status',
         'total_seats',
         'features',
-        'category',
+        'category_id',
         'base_price',
         'car_image'
     ];
@@ -20,4 +20,9 @@ class Vehicle extends Model
     protected $casts = [
         'features' => 'array',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(VehicleCategory::class, 'category_id');
+    }
 }

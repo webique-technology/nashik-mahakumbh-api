@@ -11,14 +11,36 @@ class VehicleController extends Controller
     
     public function index(Request $request)
     {
-        $query = Vehicle::query();
+        $query = Vehicle::with('category');
 
-        if ($request->category) {
+        // if ($request->category) {
+        //     $query->where('category', $request->category);
+        // }
+        // Search by name
+        if ($request->filled('name')) {
+            $query->where('name', 'LIKE', '%' . $request->name . '%');
+        }
+
+        // Filter by category
+        if ($request->filled('category')) {
             $query->where('category', $request->category);
         }
+
+        // Filter by price range
+        if ($request->filled('price')) {
+            $priceRange = explode('-', $request->price);
+
+            if (count($priceRange) === 2) {
+                $min = (int) $priceRange[0];
+                $max = (int) $priceRange[1];
+
+                $query->whereBetween('base_price', [$min, $max]);
+            }
+        }
+
         $query->orderBy('id', 'desc');
-        $vehicles = $query->paginate(10);
-        // $vehicles = Vehicle::all();
+        $vehicles = $query->paginate(9);
+        
          $vehicles->getCollection()->transform(function ($vehicle) {
             // $vehicle->car_image_url  = $vehicle->car_image ? asset('uploads/vehicles/' . $vehicle->car_image) : null;
             $vehicle->car_image_url = $vehicle->car_image ? '/uploads/vehicles/' . $vehicle->car_image: null;

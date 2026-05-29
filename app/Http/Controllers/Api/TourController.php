@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Tour;
 use App\Models\Itinerary;
 use App\Models\SeoMeta;
+use App\Models\VehicleCategory;
 
 class TourController extends Controller
 {
@@ -22,9 +23,9 @@ class TourController extends Controller
             }
 
             // Filter by category
-            if ($request->filled('category')) {
-                $query->where('category', $request->category);
-            }
+            // if ($request->filled('category')) {
+            //     $query->where('category', $request->category);
+            // }
 
             // Filter by price range
             if ($request->filled('price')) {
@@ -62,6 +63,8 @@ class TourController extends Controller
                     return $itinerary;
                 });
 
+                $tour->vehicle_categories = VehicleCategory::whereIn('id', $tour->vehicle_category_ids ?? [])->get();
+
                 return $tour;
             });
 
@@ -78,9 +81,9 @@ class TourController extends Controller
 
             'title' => 'required|string|max:255',
             'description' => 'required',
-            'category' => 'required|string',
+            // 'category' => 'required|string',
             'status' => 'required',
-            'location' => 'required',
+            // 'location' => 'required',
             'base_price' => 'required|numeric',
             'offer_price' => 'nullable|numeric',
             'taxes' => 'nullable|numeric',
@@ -105,9 +108,9 @@ class TourController extends Controller
 
             'title' => $request->title,
             'description' => $request->description,
-            'category' => $request->category,
+            // 'category' => $request->category,
             'status' => $request->status,
-            'location' => $request->location ?? '',
+            // 'location' => $request->location ?? '',
             'highlights' => $request->highlights ?? [],
             'inclusions' => $request->inclusions ?? [],
             'base_price' => $request->base_price ,
@@ -115,6 +118,8 @@ class TourController extends Controller
             'taxes' => $request->taxes ?? '',
             'total_seats' => $request->total_seats ?? '',
             'main_banner' => $banner ?? '',
+            'vehicle_category_ids' => $request->vehicles,
+            'routes' => $request->route,
         ]);
 
         // // save itineraries
@@ -179,9 +184,8 @@ class TourController extends Controller
         $request->validate([
             'title' => 'sometimes|string|max:255',
             'description' => 'sometimes',
-            'category' => 'sometimes|string',
             'status' => 'sometimes',
-            'location' => 'sometimes',
+            // 'location' => 'sometimes',
             'base_price' => 'sometimes|numeric',
             'offer_price' => 'nullable|numeric',
             'taxes' => 'nullable|numeric',
@@ -210,9 +214,9 @@ class TourController extends Controller
         $tour->update($request->only([
             'title',
             'description',
-            'category',
+            // 'category',
             'status',
-            'location',
+            // 'location',
             'base_price',
             'offer_price',
             'taxes',
@@ -226,7 +230,12 @@ class TourController extends Controller
         if ($request->has('inclusions')) {
             $tour->inclusions = $request->inclusions;
         }
-
+         if ($request->has('vehicles')) {
+            $tour->vehicle_category_ids = $request->vehicles;
+        }
+         if ($request->has('route')) {
+            $tour->routes = $request->route;
+        }
 
         $tour->save();
 

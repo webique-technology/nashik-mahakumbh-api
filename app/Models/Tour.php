@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\VehicleCategory;
 
 class Tour extends Model
 {
     protected $fillable = [
         'title',
         'description',
-        'category',
+        // 'category',
         'status',
         'location',
         'highlights',
@@ -19,11 +20,15 @@ class Tour extends Model
         'taxes',
         'total_seats',
         'main_banner',
+        'vehicle_category_ids',
+        'routes'
     ];
 
     protected $casts = [
         'highlights' => 'array',
         'inclusions' => 'array',
+        'vehicle_category_ids' => 'array',
+        'routes' => 'array',
     ];
 
     public function itineraries()
@@ -34,5 +39,12 @@ class Tour extends Model
     public function seoMeta()
     {
         return $this->hasOne(SeoMeta::class);
+    }
+    public function vehicleCategories()
+    {
+        return VehicleCategory::whereIn(
+            'id',
+            $this->vehicle_category_ids ?? []
+        )->get();
     }
 }

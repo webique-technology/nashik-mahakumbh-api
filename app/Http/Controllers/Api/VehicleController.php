@@ -61,7 +61,7 @@ class VehicleController extends Controller
             'status' => 'required',
             'total_seats' => 'required|integer',
             'features' => 'nullable|array',
-            'category' => 'required|string',
+            'category_id' => 'required',
             'base_price' => 'required|numeric',
             'car_image' => 'nullable|image|mimes:jpg,jpeg,png,webp',
 
@@ -73,7 +73,7 @@ class VehicleController extends Controller
         $vehicle->location = $request->location;
         $vehicle->status = $request->status;
         $vehicle->total_seats = $request->total_seats;
-        $vehicle->category = $request->category;
+        $vehicle->category_id = $request->category_id;
         $vehicle->base_price = $request->base_price;
 
         $vehicle->features = $request->features ?? [];
@@ -133,7 +133,7 @@ class VehicleController extends Controller
             'status' => 'sometimes',
             'total_seats' => 'sometimes|integer',
             'features' => 'nullable|array',
-            'category' => 'sometimes|string',
+            'category_id' => 'sometimes',
             'base_price' => 'sometimes|numeric',
             'car_image' => 'nullable|image|mimes:jpg,jpeg,png,webp',
 
@@ -151,8 +151,8 @@ class VehicleController extends Controller
         if ($request->has('total_seats')) {
             $vehicle->total_seats = $request->total_seats;
         }
-        if ($request->has('category')) {
-            $vehicle->category = $request->category;
+        if ($request->has('category_id')) {
+            $vehicle->category_id = $request->category_id;
         }
         if ($request->has('base_price')) {
             $vehicle->base_price = $request->base_price;

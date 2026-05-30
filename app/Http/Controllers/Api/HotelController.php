@@ -69,7 +69,7 @@ class HotelController extends Controller
         $request->validate([
 
             'title' => 'required|string|max:255',
-            'description' => 'required',
+            // 'description' => 'required',
             'rating' => 'nullable|numeric|min:0|max:5',
             'category' => 'required|string',
             'location' => 'required|string',
@@ -86,7 +86,7 @@ class HotelController extends Controller
         $hotel = new Hotel();
 
         $hotel->title = $request->title;
-        $hotel->description = $request->description;
+        // $hotel->description = $request->description;
         $hotel->rating = $request->rating;
         $hotel->category = $request->category;
         $hotel->location = $request->location;
@@ -156,7 +156,7 @@ class HotelController extends Controller
         $request->validate([
 
             'title' => 'sometimes|string|max:255',
-            'description' => 'sometimes',
+            // 'description' => 'sometimes',
             'rating' => 'nullable|numeric|min:0|max:5',
             'category' => 'sometimes|string',
             'location' => 'sometimes|string',
@@ -173,9 +173,9 @@ class HotelController extends Controller
         if ($request->has('title')) {
             $hotel->title = $request->title;
         }
-        if ($request->has('description')) {
-            $hotel->description = $request->description;
-        }
+        // if ($request->has('description')) {
+        //     $hotel->description = $request->description;
+        // }
         if ($request->has('rating')) {
             $hotel->rating = $request->rating;
         }

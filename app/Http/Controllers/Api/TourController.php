@@ -173,6 +173,12 @@ class TourController extends Controller
                 'message' => 'Tour not found'
             ], 404);
         }
+        $tour->image_url = $tour->main_banner ? '/uploads/tours/' . $tour->main_banner: null;
+        $tour->itineraries->transform(function ($itinerary) {
+                    $itinerary->itineraries_image_url = $itinerary->image ? '/uploads/itineraries/' . $itinerary->image: null;
+
+                    return $itinerary;
+         });
 
         return response()->json([
             'status' => true,
@@ -239,42 +245,81 @@ class TourController extends Controller
 
         $tour->save();
 
-        if ($request->itineraries) {
+       if ($request->itineraries) {
 
-            // Get old itineraries
-            $oldItineraries = Itinerary::where('tour_id', $tour->id)->get();
+            $existingIds = [];
 
-            // Delete old images safely
-            foreach ($oldItineraries as $old) {
-                if (!empty($old->image)) {
-                    $this->deleteFile('uploads/itineraries/' . $old->image);
-                }
-            }
-
-            // Delete old DB records
-            Itinerary::where('tour_id', $tour->id)->delete();
-
-            // Insert new itineraries
             foreach ($request->itineraries as $index => $item) {
 
-                $imageName = null;
+                $imageName = $item['existing_image'] ?? null;
 
-                // Check if new image uploaded
+                // upload new image
                 if ($request->hasFile("itineraries.$index.image")) {
 
                     $file = $request->file("itineraries.$index.image");
 
                     $imageName = time().'_'.$file->getClientOriginalName();
 
-                    $file->move(public_path('uploads/itineraries'), $imageName);
+                    $file->move(
+                        public_path('uploads/itineraries'),
+                        $imageName
+                    );
                 }
 
-                Itinerary::create([
-                    'tour_id' => $tour->id,
-                    'itinerary_title' => $item['itinerary_title'],
-                    'description' => $item['description'],
-                    'image' => $imageName, // null if not uploaded
-                ]);
+                // update existing itinerary
+                if (!empty($item['id'])) {
+
+                    $itinerary = Itinerary::find($item['id']);
+
+                    if ($itinerary) {
+
+                        // if new image uploaded remove old image
+                        if (
+                            $request->hasFile("itineraries.$index.image") &&
+                            !empty($itinerary->image)
+                        ) {
+                            $this->deleteFile(
+                                'uploads/itineraries/' . $itinerary->image
+                            );
+                        }
+
+                        $itinerary->update([
+                            'itinerary_title' => $item['itinerary_title'],
+                            'description' => $item['description'],
+                            'image' => $imageName,
+                        ]);
+
+                        $existingIds[] = $itinerary->id;
+                    }
+
+                } else {
+
+                    // create new itinerary
+                    $new = Itinerary::create([
+                        'tour_id' => $tour->id,
+                        'itinerary_title' => $item['itinerary_title'],
+                        'description' => $item['description'],
+                        'image' => $imageName,
+                    ]);
+
+                    $existingIds[] = $new->id;
+                }
+            }
+
+            // delete removed itineraries
+            $removed = Itinerary::where('tour_id', $tour->id)
+                ->whereNotIn('id', $existingIds)
+                ->get();
+
+            foreach ($removed as $row) {
+
+                if (!empty($row->image)) {
+                    $this->deleteFile(
+                        'uploads/itineraries/' . $row->image
+                    );
+                }
+
+                $row->delete();
             }
         }
 
@@ -323,8 +368,18 @@ class TourController extends Controller
     // }
     private function deleteFile($path)
     {
-        if ($path && file_exists(public_path($path))) {
-            unlink(public_path($path));
+        // if ($path && file_exists(public_path($path))) {
+        //     unlink(public_path($path));
+        // }
+
+        if (!$path) {
+            return;
+        }
+
+        $fullPath = public_path($path);
+
+        if (file_exists($fullPath) && is_file($fullPath)) {
+            unlink($fullPath);
         }
     }
 

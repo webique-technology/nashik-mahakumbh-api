@@ -12,7 +12,7 @@ class TourEnquiryController extends Controller
     {
         $search = $request->search;
 
-        $query = TourEnquiry::with('tour');
+        $query = TourEnquiry::with('tour','vehicleCategory');
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -42,6 +42,8 @@ class TourEnquiryController extends Controller
                 'tour_name' => $enquiry->tour?->title,
 
                 'special_requirements' => $enquiry->special_requirements,
+                'vehicle_category_id' => $enquiry->vehicle_category_id,
+                'vehicle_category' => $enquiry->vehicleCategory?->category,
                 'created_at' => $enquiry->created_at,
             ];
         });
@@ -63,6 +65,7 @@ class TourEnquiryController extends Controller
             'preferred_dates' => 'nullable|string|max:255',
             'tour_id' => 'required|exists:tours,id',
             'special_requirements' => 'nullable|string',
+            'vehicle_category_id' => 'int',
         ]);
 
         $enquiry = TourEnquiry::create($validated);

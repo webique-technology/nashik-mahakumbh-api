@@ -26,6 +26,8 @@ Route::get('/tours/{id}', [TourController::class, 'show']);
 Route::post('/tours/{id}', [TourController::class, 'update']);
 Route::delete('/tours/{id}', [TourController::class, 'destroy']);
 
+Route::get('/tours/{id}/vehicle-categories', [TourController::class, 'getVehicleCategories']);
+
 Route::get('/vehicles', [VehicleController::class, 'index']);
 Route::get('/vehicles/{id}', [VehicleController::class, 'show']);
 Route::post('/vehicles', [VehicleController::class, 'store']);

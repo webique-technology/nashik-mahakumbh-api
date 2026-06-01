@@ -403,4 +403,28 @@ class TourController extends Controller
             'message' => 'Tour deleted successfully'
         ]);
     }
+
+    public function getVehicleCategories($id)
+    {
+        $tour = Tour::find($id);
+
+        if (!$tour) {
+            return response()->json([
+                'message' => 'Tour not found'
+            ], 404);
+        }
+
+        $categoryIds =
+            $tour->vehicle_category_ids ?? [];
+
+        $categories =
+            VehicleCategory::whereIn(
+                'id',
+                $categoryIds
+            )
+            ->select('id', 'category')
+            ->get();
+
+        return response()->json($categories);
+    }
 }

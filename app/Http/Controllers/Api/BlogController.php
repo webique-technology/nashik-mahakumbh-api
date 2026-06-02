@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Blog;
+use Illuminate\Support\Str;
 
 class BlogController extends Controller
 {
@@ -27,7 +28,7 @@ class BlogController extends Controller
 
         // $perPage = $request->per_page ?? 10;
 
-        $blogs = $query->paginate(10);
+        $blogs = $query->paginate(8);
 
         $blogs->getCollection()->transform(function ($blog) {
             $blog->image_url = $blog->image ? asset('uploads/blogs/' . $blog->image) : null;
@@ -185,6 +186,27 @@ class BlogController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Blog deleted successfully'
+        ]);
+    }
+
+    public function getBySlug($slug)
+    {
+        $blog = Blog::all()->first(function ($item) use ($slug) {
+            return Str::slug($item->title) === $slug;
+        });
+
+        if (!$blog) {
+            return response()->json([
+                'message' => 'Blog not found'
+            ], 404);
+        }
+
+        $blog->image_url = $blog->image
+            ? asset('uploads/blogs/' . $blog->image)
+            : null;
+
+        return response()->json([
+            'data' => $blog
         ]);
     }
 }

@@ -25,6 +25,7 @@ Route::get('/tours', [TourController::class, 'index']);
 Route::get('/tours/{id}', [TourController::class, 'show']);
 Route::post('/tours/{id}', [TourController::class, 'update']);
 Route::delete('/tours/{id}', [TourController::class, 'destroy']);
+Route::get('/tours/slug/{slug}', [TourController::class, 'getBySlug']);
 
 Route::get('/tours/{id}/vehicle-categories', [TourController::class, 'getVehicleCategories']);
 

@@ -8,6 +8,7 @@ use App\Models\Tour;
 use App\Models\Itinerary;
 use App\Models\SeoMeta;
 use App\Models\VehicleCategory;
+use Illuminate\Support\Str;
 
 class TourController extends Controller
 {
@@ -426,5 +427,38 @@ class TourController extends Controller
             ->get();
 
         return response()->json($categories);
+    }
+
+    public function getBySlug($slug)
+    {
+        $tour = Tour::with(['itineraries', 'seoMeta'])
+            ->get()
+            ->first(function ($item) use ($slug) {
+                return Str::slug($item->title) === $slug;
+            });
+
+        if (!$tour) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Tour not found'
+            ], 404);
+        }
+
+        $tour->image_url = $tour->main_banner
+            ? asset('uploads/tours/' . $tour->main_banner)
+            : null;
+
+        $tour->itineraries->transform(function ($itinerary) {
+            $itinerary->itineraries_image_url = $itinerary->image
+                ? asset('uploads/itineraries/' . $itinerary->image)
+                : null;
+
+            return $itinerary;
+        });
+
+        return response()->json([
+            'status' => true,
+            'data' => $tour
+        ]);
     }
 }

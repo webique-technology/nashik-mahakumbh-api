@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\SliderController;
 use App\Http\Controllers\Api\TourEnquiryController;
 use App\Http\Controllers\Api\ContactUsController;
 use App\Http\Controllers\Api\VehicleCategoryController;
+use App\Http\Controllers\Api\CarouselController;
 
 Route::get('/test', function () {
     return response()->json([
@@ -75,6 +76,15 @@ Route::get('/contact-us', [ContactUsController::class, 'index']);
 // Route::delete('/contact-us/{id}', [ContactUsController::class, 'destroy']);
 
 Route::get('/vehicle-categories', [VehicleCategoryController::class, 'index']);
+
+
+Route::prefix('carousel')->group(function () {
+    Route::get('/', [CarouselController::class, 'index']);
+    Route::post('/store', [CarouselController::class, 'store']);
+    Route::get('/{id}', [CarouselController::class, 'show']);
+    Route::post('/update/{id}', [CarouselController::class, 'update']);
+    Route::delete('/delete/{id}', [CarouselController::class, 'destroy']);
+});
 
 
 Route::middleware('api.language')->group(function () {

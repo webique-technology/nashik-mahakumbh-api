@@ -13,7 +13,7 @@ class CarouselController extends Controller
      */
     public function index()
     {
-        $carousels = Carousel::latest()->paginate(10);
+        $carousels = Carousel::latest()->paginate(8);
 
         $carousels->getCollection()->transform(function ($carousel) {
             $carousel->image_url = $carousel->carousel_image
@@ -40,7 +40,7 @@ class CarouselController extends Controller
             'second_button_name' => 'nullable|string|max:255',
             'second_button_link' => 'nullable|string|max:500',
             'status' => 'nullable',
-            'carousel_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'carousel_image' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $imageName = null;

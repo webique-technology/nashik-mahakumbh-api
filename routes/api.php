@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\TourEnquiryController;
 use App\Http\Controllers\Api\ContactUsController;
 use App\Http\Controllers\Api\VehicleCategoryController;
 use App\Http\Controllers\Api\CarouselController;
+use App\Http\Controllers\Api\VideoController;
 
 Route::get('/test', function () {
     return response()->json([
@@ -84,6 +85,14 @@ Route::prefix('carousel')->group(function () {
     Route::get('/{id}', [CarouselController::class, 'show']);
     Route::post('/update/{id}', [CarouselController::class, 'update']);
     Route::delete('/delete/{id}', [CarouselController::class, 'destroy']);
+});
+
+Route::prefix('videos')->group(function () {
+    Route::get('/', [VideoController::class, 'index']);
+    Route::post('/store', [VideoController::class, 'store']);
+    Route::get('/{id}', [VideoController::class, 'show']);
+    Route::post('/update/{id}', [VideoController::class, 'update']);
+    Route::delete('/delete/{id}', [VideoController::class, 'destroy']);
 });
 
 

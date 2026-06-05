@@ -17,13 +17,24 @@ class VehicleController extends Controller
         //     $query->where('category', $request->category);
         // }
         // Search by name
+       
         if ($request->filled('name')) {
-            $query->where('name', 'LIKE', '%' . $request->name . '%');
+            $query->where(
+                'name',
+                'like',
+                '%' . $request->name . '%'
+            );
         }
 
         // Filter by category
         if ($request->filled('category')) {
-            $query->where('category', $request->category);
+            $query->whereHas('category', function ($q) use ($request) {
+                $q->where(
+                    'category',
+                    'like',
+                    '%' . $request->category . '%'
+                );
+            });
         }
 
         // Filter by price range

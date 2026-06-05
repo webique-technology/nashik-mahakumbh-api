@@ -12,9 +12,9 @@ class HotelController extends Controller
     {
         $query = Hotel::query();
 
-        if ($request->has('search') && !empty($request->search)) {
+        if ($request->has('title') && !empty($request->title)) {
 
-            $query->where('title', 'LIKE', '%' . $request->search . '%');
+            $query->where('title', 'LIKE', '%' . $request->title . '%');
         }
 
         if ($request->has('category') && !empty($request->category)) {

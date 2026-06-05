@@ -19,9 +19,10 @@ class TourController extends Controller
         $query = \App\Models\Tour::with(['itineraries', 'seoMeta']);
 
             // Search by title
-            if ($request->filled('name')) {
-                $query->where('title', 'LIKE', '%' . $request->name . '%');
+            if ($request->filled('title')) {
+                $query->where('title', 'like', '%' . $request->title . '%');
             }
+
 
             // Filter by category
             // if ($request->filled('category')) {

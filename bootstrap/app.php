@@ -30,6 +30,8 @@ return Application::configure(basePath: dirname(__DIR__))
         except: [
             'api/tour-enquiries',
             'api/contact-us',
+            'api/hotel-enquiries/store',
+            'api/vehicle-enquiries/store',
         ]
     );
     })

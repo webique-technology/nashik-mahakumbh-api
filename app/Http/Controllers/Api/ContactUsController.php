@@ -12,20 +12,41 @@ class ContactUsController extends Controller
     public function index(Request $request)
     {
         $search = $request->search;
+        $date = $request->date;
+
         $query = ContactUs::query();
-       
+
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('full_name', 'LIKE', "%{$search}%")
-                  ->orWhere('email', 'LIKE', "%{$search}%")
-                  ->orWhere('mobile_number', 'LIKE', "%{$search}%")
-                  ->orWhere('inquiry_type', 'LIKE', "%{$search}%");
+                ->orWhere('email', 'LIKE', "%{$search}%")
+                ->orWhere('mobile_number', 'LIKE', "%{$search}%")
+                ->orWhere('inquiry_type', 'LIKE', "%{$search}%");
             });
         }
 
+        // Date filter
+        if ($date) {
+            $query->whereDate('created_at', $date);
+        }
+
         $contacts = $query
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->paginate(10);
+
+        $contacts->getCollection()->transform(function ($contact) {
+            return [
+                'id' => $contact->id,
+                'full_name' => $contact->full_name,
+                'email' => $contact->email,
+                'mobile_number' => $contact->mobile_number,
+                'inquiry_type' => $contact->inquiry_type,
+                'your_message' => $contact->your_message,
+
+                // Readable date
+                'created_at' => $contact->created_at->format('d M Y, h:i A'),
+            ];
+        });
 
         return response()->json([
             'success' => true,

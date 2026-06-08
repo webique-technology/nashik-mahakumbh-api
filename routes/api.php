@@ -12,6 +12,8 @@ use App\Http\Controllers\Api\ContactUsController;
 use App\Http\Controllers\Api\VehicleCategoryController;
 use App\Http\Controllers\Api\CarouselController;
 use App\Http\Controllers\Api\VideoController;
+use App\Http\Controllers\Api\HotelEnquiryController;
+use App\Http\Controllers\Api\VehicleEnquiryController;
 
 Route::get('/test', function () {
     return response()->json([
@@ -93,6 +95,21 @@ Route::prefix('videos')->group(function () {
     Route::get('/{id}', [VideoController::class, 'show']);
     Route::post('/update/{id}', [VideoController::class, 'update']);
     Route::delete('/delete/{id}', [VideoController::class, 'destroy']);
+});
+Route::prefix('hotel-enquiries')->group(function () {
+    Route::get('/', [HotelEnquiryController::class, 'index']);
+    Route::post('/store', [HotelEnquiryController::class, 'store']);
+    Route::get('/{id}', [HotelEnquiryController::class, 'show']);
+    Route::post('/update/{id}', [HotelEnquiryController::class, 'update']);
+    Route::delete('/delete/{id}', [HotelEnquiryController::class, 'destroy']);
+});
+
+Route::prefix('vehicle-enquiries')->group(function () {
+    Route::get('/', [VehicleEnquiryController::class, 'index']);
+    Route::post('/store', [VehicleEnquiryController::class, 'store']);
+    Route::get('/{id}', [VehicleEnquiryController::class, 'show']);
+    Route::post('/update/{id}', [VehicleEnquiryController::class, 'update']);
+    Route::delete('/delete/{id}', [VehicleEnquiryController::class, 'destroy']);
 });
 
 

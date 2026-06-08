@@ -13,6 +13,7 @@ class VehicleEnquiryController extends Controller
      */
     public function index(Request $request)
     {
+        $date = $request->date;
         $query = VehicleEnquiry::with('vehicle');
 
         // Search by name
@@ -42,14 +43,36 @@ class VehicleEnquiryController extends Controller
                 ]
             );
         }
+        if ($date) {
+            $query->whereDate('created_at', $date);
+        }
 
         $perPage = $request->get('per_page', 10);
 
         $enquiries = $query
-            ->latest()
+             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
-        return response()->json($enquiries);
+        // return response()->json($enquiries);
+         $enquiries->getCollection()->transform(function ($enquiry) {
+            return [
+                'id' => $enquiry->id,
+                'full_name' => $enquiry->full_name,
+                'mobile_number' => $enquiry->mobile_number,
+                'pickup_date' => $enquiry->pickup_date,
+                'return_date' => $enquiry->return_date,
+                'passengers' => $enquiry->passengers,
+                'vehicle_id' => $enquiry->vehicle_id,
+
+                // Readable date
+                'created_at' => $enquiry->created_at->format('d M Y, h:i A'),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $enquiries
+        ]);
     }
 
     /**

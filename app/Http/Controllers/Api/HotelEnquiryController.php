@@ -13,6 +13,7 @@ class HotelEnquiryController extends Controller
      */
     public function index(Request $request)
     {
+        $date = $request->date;
         $query = HotelEnquiry::with('hotel');
 
         // Search by Name
@@ -31,14 +32,39 @@ class HotelEnquiryController extends Controller
                 [$request->from_date, $request->to_date]
             );
         }
-
+        if ($date) {
+            $query->whereDate('created_at', $date);
+        }
         $perPage = $request->get('per_page', 10);
 
         $enquiries = $query
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
-        return response()->json($enquiries);
+        // return response()->json($enquiries);
+         $enquiries->getCollection()->transform(function ($enquiry) {
+            return [
+                'id' => $enquiry->id,
+                'full_name' => $enquiry->full_name,
+                'email' => $enquiry->email,
+                'mobile_number' => $enquiry->mobile_number,
+                'room_type' => $enquiry->room_type,
+                'inquiry_type' => $enquiry->inquiry_type,
+                'check_in_date' => $enquiry->check_in_date,
+                'check_out_date' => $enquiry->check_out_date,
+                'adults' => $enquiry->adults,
+                'children' => $enquiry->children,
+                'hotel_id' => $enquiry->hotel_id,
+
+                // Readable date
+                'created_at' => $enquiry->created_at->format('d M Y, h:i A'),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $enquiries
+        ]);
     }
 
     /**

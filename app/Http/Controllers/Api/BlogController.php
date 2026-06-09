@@ -26,6 +26,23 @@ class BlogController extends Controller
 
         $query->orderBy('id', 'desc');
 
+        if ($request->filled('limit')) {
+            $blogs = $query->take($request->limit)->get();
+            $blogs->transform(function ($blog) {
+
+                $blog->image_url = $blog->image
+                    ? asset('uploads/blogs/' . $blog->image)
+                    : null;
+
+                return $blog;
+            });
+
+            return response()->json([
+                'status' => true,
+                'data' => $blogs
+            ]);
+        }
+
         // $perPage = $request->per_page ?? 10;
 
         $blogs = $query->paginate(8);

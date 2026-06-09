@@ -48,6 +48,26 @@ class TourController extends Controller
 
             $query->latest();
 
+            if ($request->filled('limit')) {
+
+                $tours = $query->take($request->limit)->get();
+
+                $tours->transform(function ($tour) {
+
+                    $tour->image_url = $tour->main_banner
+                        ? asset('uploads/tours/' . $tour->main_banner)
+                        : null;
+
+                    return $tour;
+                });
+
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Tours fetched successfully',
+                    'data' => $tours
+                ]);
+            }
+
             $tours = $query->paginate(9);
             
 

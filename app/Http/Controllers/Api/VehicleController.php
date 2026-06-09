@@ -50,6 +50,27 @@ class VehicleController extends Controller
         }
 
         $query->orderBy('id', 'desc');
+
+         if ($request->filled('limit')) {
+
+            $vehicles = $query->take($request->limit)->get();
+
+            $vehicles->transform(function ($vehicle) {
+
+                $vehicle->image_url = $vehicle->car_image
+                    ? asset('uploads/vehicles/' . $vehicle->car_image)
+                    : null;
+
+                return $vehicle;
+            });
+
+            return response()->json([
+                'status' => true,
+                'message' => 'vehicles fetched successfully',
+                'data' => $vehicles
+            ]);
+        }
+
         $vehicles = $query->paginate(9);
         
          $vehicles->getCollection()->transform(function ($vehicle) {

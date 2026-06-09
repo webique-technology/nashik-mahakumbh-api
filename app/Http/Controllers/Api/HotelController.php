@@ -29,6 +29,31 @@ class HotelController extends Controller
 
         $query->orderBy('id', 'desc');
 
+        if ($request->filled('limit')) {
+
+            $hotels = $query->take($request->limit)->get();
+
+            $hotels->transform(function ($hotel) {
+
+                $hotel->images = collect($hotel->images)->map(function ($image) {
+                    return asset('uploads/hotels/' . $image);
+                });
+
+                $hotel->image_url = !empty($hotel->images[0])
+                    ? $hotel->images[0]
+                    : null;
+
+                return $hotel;
+            });
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Hotels fetched successfully',
+                'data' => $hotels
+            ]);
+        }
+
+
         $hotels = $query->paginate(10);
 
         // $hotels->getCollection()->transform(function ($hotel) {

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Blog;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class BlogController extends Controller
 {
@@ -49,6 +50,7 @@ class BlogController extends Controller
 
         $blogs->getCollection()->transform(function ($blog) {
             $blog->image_url = $blog->image ? asset('uploads/blogs/' . $blog->image) : null;
+            $blog->date = Carbon::parse($blog->created_at)->format('d/m/Y');
             return $blog;
         });
 

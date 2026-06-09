@@ -9,6 +9,7 @@ use App\Models\Itinerary;
 use App\Models\SeoMeta;
 use App\Models\VehicleCategory;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class TourController extends Controller
 {
@@ -58,6 +59,16 @@ class TourController extends Controller
                         ? asset('uploads/tours/' . $tour->main_banner)
                         : null;
 
+                    if ($tour->start_date && $tour->end_date) {
+                        $days = Carbon::parse($tour->start_date)
+                            ->diffInDays(Carbon::parse($tour->end_date)) + 1;
+                        $nights = max($days - 1, 0);
+                        $tour->duration = "{$days} Days / {$nights} Nights";
+                    } else {
+                        $tour->duration = null;
+                    }
+
+
                     return $tour;
                 });
 
@@ -87,6 +98,15 @@ class TourController extends Controller
 
                 $tour->vehicle_categories = VehicleCategory::whereIn('id', $tour->vehicle_category_ids ?? [])->get();
 
+                if ($tour->start_date && $tour->end_date) {
+                    $days = Carbon::parse($tour->start_date)
+                        ->diffInDays(Carbon::parse($tour->end_date)) + 1;
+                    $nights = max($days - 1, 0);
+                    $tour->duration = "{$days} Days / {$nights} Nights";
+                } else {
+                    $tour->duration = null;
+                }
+
                 return $tour;
             });
 
@@ -113,6 +133,8 @@ class TourController extends Controller
             'main_banner' => 'nullable|image|mimes:jpg,jpeg,png,webp',
             'highlights' => 'nullable|array',
             'inclusions' => 'nullable|array',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
         // upload banner
@@ -139,6 +161,8 @@ class TourController extends Controller
             'offer_price' => $request->offer_price ?? '',
             'taxes' => $request->taxes ?? '',
             'total_seats' => $request->total_seats ?? '',
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
             'main_banner' => $banner ?? '',
             'vehicle_category_ids' => $request->vehicles,
             'routes' => $request->route,
@@ -202,6 +226,15 @@ class TourController extends Controller
                     return $itinerary;
          });
 
+        if ($tour->start_date && $tour->end_date) {
+            $days = Carbon::parse($tour->start_date)
+                ->diffInDays(Carbon::parse($tour->end_date)) + 1;
+            $nights = max($days - 1, 0);
+            $tour->duration = "{$days} Days / {$nights} Nights";
+        } else {
+            $tour->duration = null;
+        }
+
         return response()->json([
             'status' => true,
             'data' => $tour
@@ -221,6 +254,8 @@ class TourController extends Controller
             'main_banner' => 'nullable|image|mimes:jpg,jpeg,png,webp',
             'highlights' => 'nullable|array',
             'inclusions' => 'nullable|array',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
         $tour = Tour::find($id);
@@ -249,6 +284,8 @@ class TourController extends Controller
             'offer_price',
             'taxes',
             'total_seats',
+            'start_date',
+            'end_date',
         ]));
 
         if ($request->has('highlights')) {
@@ -468,6 +505,15 @@ class TourController extends Controller
         $tour->image_url = $tour->main_banner
             ? asset('uploads/tours/' . $tour->main_banner)
             : null;
+
+        if ($tour->start_date && $tour->end_date) {
+            $days = Carbon::parse($tour->start_date)
+                ->diffInDays(Carbon::parse($tour->end_date)) + 1;
+            $nights = max($days - 1, 0);
+            $tour->duration = "{$days} Days / {$nights} Nights";
+        } else {
+            $tour->duration = null;
+        }
 
         $tour->itineraries->transform(function ($itinerary) {
             $itinerary->itineraries_image_url = $itinerary->image

@@ -21,7 +21,9 @@ class Tour extends Model
         'total_seats',
         'main_banner',
         'vehicle_category_ids',
-        'routes'
+        'routes',
+        'start_date',
+        'end_date',
     ];
 
     protected $casts = [

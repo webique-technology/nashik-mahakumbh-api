@@ -15,6 +15,7 @@ class DashboardController extends Controller
         $tourCount = Tour::count();
         $vehicleCount = Vehicle::count();
         $hotelCount = Hotel::count();
+        $blogCount = Blog::count();
 
         // latest enquiries
         $recentEnquiries = TourEnquiry::latest()
@@ -33,6 +34,7 @@ class DashboardController extends Controller
                 'tours' => $tourCount,
                 'vehicles' => $vehicleCount,
                 'hotels' => $hotelCount,
+                'blogs' => $blogCount,
                 'visitors' => 0, // add later
             ],
 

@@ -89,7 +89,7 @@ class VehicleController extends Controller
         $request->validate([
 
             'name' => 'required|string|max:255',
-            'location' => 'required|string',
+            // 'location' => 'required|string',
             'status' => 'required',
             'total_seats' => 'required|integer',
             'features' => 'nullable|array',
@@ -102,7 +102,7 @@ class VehicleController extends Controller
         $vehicle = new Vehicle();
 
         $vehicle->name = $request->name;
-        $vehicle->location = $request->location;
+        // $vehicle->location = $request->location;
         $vehicle->status = $request->status;
         $vehicle->total_seats = $request->total_seats;
         $vehicle->category_id = $request->category_id;
@@ -161,7 +161,7 @@ class VehicleController extends Controller
         $request->validate([
 
             'name' => 'sometimes|string|max:255',
-            'location' => 'sometimes|string',
+            // 'location' => 'sometimes|string',
             'status' => 'sometimes',
             'total_seats' => 'sometimes|integer',
             'features' => 'nullable|array',
@@ -174,9 +174,9 @@ class VehicleController extends Controller
         if ($request->has('name')) {
             $vehicle->name = $request->name;
         }
-        if ($request->has('location')) {
-            $vehicle->location = $request->location;
-        }
+        // if ($request->has('location')) {
+        //     $vehicle->location = $request->location;
+        // }
         if ($request->has('status')) {
             $vehicle->status = $request->status;
         }

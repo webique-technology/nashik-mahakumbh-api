@@ -11,5 +11,10 @@ class Blog extends Model
         'description',
         'category',
         'image',
+        'slug'
     ];
+    public function translations()
+    {
+        return $this->hasMany(BlogTranslation::class);
+    }
 }

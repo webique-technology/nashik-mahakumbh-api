@@ -7,13 +7,16 @@ use Illuminate\Http\Request;
 use App\Models\Blog;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Jobs\TranslateBlogJob;
 
 class BlogController extends Controller
 {
     
     public function index(Request $request)
     {
-        $query = Blog::query();
+        // $query = Blog::query();
+        $lang = $request->get('lang','en');
+        $query = Blog::with(['translations']);
 
         if ($request->has('search') && !empty($request->search)) {
 
@@ -29,11 +32,32 @@ class BlogController extends Controller
 
         if ($request->filled('limit')) {
             $blogs = $query->take($request->limit)->get();
-            $blogs->transform(function ($blog) {
+            // $blogs->transform(function ($blog) {
 
-                $blog->image_url = $blog->image
-                    ? asset('uploads/blogs/' . $blog->image)
-                    : null;
+            //     $blog->image_url = $blog->image
+            //         ? asset('uploads/blogs/' . $blog->image)
+            //         : null;
+
+            //     return $blog;
+            // });
+            $blogs->transform(function ($blog) use ($lang) {
+
+            if($lang !== 'en') {
+
+                    $translation = $blog->translations
+                        ->where('language_code',$lang)
+                        ->first();
+
+                    if($translation) {
+                        $blog->title = $translation->title;
+                        $blog->description = $translation->description;
+                    }
+                }
+
+                $blog->image_url =
+                    $blog->image
+                        ? asset('uploads/blogs/'.$blog->image)
+                        : null;
 
                 return $blog;
             });
@@ -48,7 +72,28 @@ class BlogController extends Controller
 
         $blogs = $query->paginate(8);
 
-        $blogs->getCollection()->transform(function ($blog) {
+        // $blogs->getCollection()->transform(function ($blog) {
+        $blogs->getCollection()->transform(function ($blog) use ($lang) {
+
+            if($lang != 'en') {
+
+                $translation = $blog->translations
+                    ->where('language_code',$lang)
+                    ->first();
+
+                if($translation) {
+
+                    $blog->title =
+                        $translation->title;
+
+                    $blog->description =
+                        $translation->description;
+                }
+            }
+
+
+
+
             $blog->image_url = $blog->image ? asset('uploads/blogs/' . $blog->image) : null;
             $blog->date = Carbon::parse($blog->created_at)->format('d/m/Y');
             return $blog;
@@ -78,6 +123,7 @@ class BlogController extends Controller
         $blog->description = $request->description;
 
         $blog->category = $request->category;
+        $blog->slug = Str::slug($request->title);
 
         if ($request->hasFile('image')) {
 
@@ -91,6 +137,7 @@ class BlogController extends Controller
         }
 
         $blog->save();
+        TranslateBlogJob::dispatch($blog);
 
         return response()->json([
             'status' => true,
@@ -141,6 +188,7 @@ class BlogController extends Controller
 
         if ($request->filled('title')) {
             $blog->title = $request->title;
+            $blog->slug = Str::slug($request->title);
         }
 
         if ($request->filled('description')) {
@@ -171,6 +219,7 @@ class BlogController extends Controller
         }
 
         $blog->save();
+        TranslateBlogJob::dispatch($blog);
 
         return response()->json([
             'status' => true,
@@ -208,16 +257,53 @@ class BlogController extends Controller
         ]);
     }
 
-    public function getBySlug($slug)
+    // public function getBySlug($slug)
+    // {
+    //     $blog = Blog::all()->first(function ($item) use ($slug) {
+    //         return Str::slug($item->title) === $slug;
+    //     });
+
+    //     if (!$blog) {
+    //         return response()->json([
+    //             'message' => 'Blog not found'
+    //         ], 404);
+    //     }
+
+    //     $blog->image_url = $blog->image
+    //         ? asset('uploads/blogs/' . $blog->image)
+    //         : null;
+
+    //     return response()->json([
+    //         'data' => $blog
+    //     ]);
+    // }
+
+    public function getBySlug(Request $request, $slug)
     {
-        $blog = Blog::all()->first(function ($item) use ($slug) {
-            return Str::slug($item->title) === $slug;
-        });
+        $lang = $request->get('lang', 'en');
+
+        $blog = Blog::with('translations')
+            ->where('slug', $slug)
+            ->first();
 
         if (!$blog) {
+
             return response()->json([
                 'message' => 'Blog not found'
             ], 404);
+        }
+
+        if ($lang !== 'en') {
+
+            $translation = $blog->translations
+                ->where('language_code', $lang)
+                ->first();
+
+            if ($translation) {
+
+                $blog->title = $translation->title;
+                $blog->description = $translation->description;
+            }
         }
 
         $blog->image_url = $blog->image

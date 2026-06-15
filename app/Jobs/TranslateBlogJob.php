@@ -48,30 +48,64 @@ class TranslateBlogJob implements ShouldQueue
             'ml',
             'sa'
         ];
-
         foreach ($languages as $lang) {
 
-            BlogTranslation::updateOrCreate(
+            try {
 
-                [
-                    'blog_id' => $this->blog->id,
-                    'language_code' => $lang
-                ],
-
-                [
-                    'title' =>
-                        TranslationService::translate(
+                BlogTranslation::updateOrCreate(
+                    [
+                        'blog_id' => $this->blog->id,
+                        'language_code' => $lang
+                    ],
+                    [
+                        'title' => TranslationService::translate(
                             $this->blog->title,
                             $lang
                         ),
 
-                    'description' =>
-                        HtmlTranslationService::translateHtml(
+                        'description' => HtmlTranslationService::translateHtml(
                             $this->blog->description,
                             $lang
                         )
-                ]
-            );
+                    ]
+                );
+
+            } catch (\Exception $e) {
+
+                \Log::error(
+                    'Translation Failed',
+                    [
+                        'blog_id' => $this->blog->id,
+                        'lang' => $lang,
+                        'error' => $e->getMessage()
+                    ]
+                );
+            }
         }
+
+        // foreach ($languages as $lang) {
+
+        //     BlogTranslation::updateOrCreate(
+
+        //         [
+        //             'blog_id' => $this->blog->id,
+        //             'language_code' => $lang
+        //         ],
+
+        //         [
+        //             'title' =>
+        //                 TranslationService::translate(
+        //                     $this->blog->title,
+        //                     $lang
+        //                 ),
+
+        //             'description' =>
+        //                 HtmlTranslationService::translateHtml(
+        //                     $this->blog->description,
+        //                     $lang
+        //                 )
+        //         ]
+        //     );
+        // }
     }
 }

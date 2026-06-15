@@ -137,7 +137,8 @@ class BlogController extends Controller
         }
 
         $blog->save();
-        TranslateBlogJob::dispatch($blog);
+        // TranslateBlogJob::dispatch($blog);
+        TranslateBlogJob::dispatchSync($blog);
 
         return response()->json([
             'status' => true,
@@ -219,7 +220,8 @@ class BlogController extends Controller
         }
 
         $blog->save();
-        TranslateBlogJob::dispatch($blog);
+        // TranslateBlogJob::dispatch($blog);
+        TranslateBlogJob::dispatchSync($blog);
 
         return response()->json([
             'status' => true,

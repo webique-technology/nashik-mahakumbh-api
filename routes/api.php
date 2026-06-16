@@ -43,6 +43,8 @@ Route::get('/hotels', [HotelController::class, 'index']);
 Route::get('/hotels/{id}', [HotelController::class, 'show']);
 
 //blogs
+Route::post('/blogs/translate/{id}', [BlogController::class, 'translateBlog']);
+
 Route::get('/blogs', [BlogController::class, 'index']);
 Route::get('/blogs/{id}', [BlogController::class, 'show']);
 Route::get('/blogs/slug/{slug}', [BlogController::class, 'getBySlug']);

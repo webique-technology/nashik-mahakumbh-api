@@ -138,7 +138,7 @@ class BlogController extends Controller
 
         $blog->save();
         // TranslateBlogJob::dispatch($blog);
-        TranslateBlogJob::dispatchSync($blog);
+        // TranslateBlogJob::dispatchSync($blog);
 
         return response()->json([
             'status' => true,
@@ -221,7 +221,7 @@ class BlogController extends Controller
 
         $blog->save();
         // TranslateBlogJob::dispatch($blog);
-        TranslateBlogJob::dispatchSync($blog);
+        // TranslateBlogJob::dispatchSync($blog);
 
         return response()->json([
             'status' => true,
@@ -314,6 +314,18 @@ class BlogController extends Controller
 
         return response()->json([
             'data' => $blog
+        ]);
+    }
+
+    public function translateBlog($id)
+    {
+        $blog = Blog::findOrFail($id);
+
+        TranslateBlogJob::dispatchSync($blog);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Translation completed'
         ]);
     }
 }

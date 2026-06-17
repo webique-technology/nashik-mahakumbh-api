@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\VehicleCategory;
+use App\Models\TourTranslation;
 
 class Tour extends Model
 {
@@ -24,6 +25,7 @@ class Tour extends Model
         'routes',
         'start_date',
         'end_date',
+        'slug'
     ];
 
     protected $casts = [
@@ -48,5 +50,9 @@ class Tour extends Model
             'id',
             $this->vehicle_category_ids ?? []
         )->get();
+    }
+    public function translations()
+    {
+        return $this->hasMany(TourTranslation::class);
     }
 }

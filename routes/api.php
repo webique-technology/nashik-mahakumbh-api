@@ -27,6 +27,8 @@ Route::get('/test', function () {
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 
 //tours
+Route::post('/tours/translate/{id}', [TourController::class, 'translateTour']);
+
 Route::get('/tours', [TourController::class, 'index']);
 Route::get('/tours/{id}', [TourController::class, 'show']);
 Route::get('/tours/slug/{slug}', [TourController::class, 'getBySlug']);

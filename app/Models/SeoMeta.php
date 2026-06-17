@@ -18,4 +18,8 @@ class SeoMeta extends Model
     {
         return $this->belongsTo(Tour::class);
     }
+    public function translations()
+    {
+        return $this->hasMany(SeoMetaTranslation::class);
+    }
 }

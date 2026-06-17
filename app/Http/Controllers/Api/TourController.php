@@ -166,6 +166,7 @@ class TourController extends Controller
             'main_banner' => $banner ?? '',
             'vehicle_category_ids' => $request->vehicles,
             'routes' => $request->route,
+            'slug' => Str::slug($request->title),
         ]);
 
         // // save itineraries
@@ -288,6 +289,9 @@ class TourController extends Controller
             'end_date',
         ]));
 
+        if ($request->filled('title')) {
+            $tour->slug = Str::slug($request->title);
+        }
         if ($request->has('highlights')) {
             $tour->highlights = $request->highlights;
         }
@@ -487,13 +491,17 @@ class TourController extends Controller
         return response()->json($categories);
     }
 
-    public function getBySlug($slug)
+    public function getBySlug(Request $request, $slug)
     {
-        $tour = Tour::with(['itineraries', 'seoMeta'])
-            ->get()
-            ->first(function ($item) use ($slug) {
-                return Str::slug($item->title) === $slug;
-            });
+        $lang = $request->get('lang', 'en');
+
+        $tour = Tour::with([
+            'translations',
+            'itineraries.translations',
+            'seoMeta.translations'
+        ])
+        ->where('slug', $slug)
+        ->first();
 
         if (!$tour) {
             return response()->json([
@@ -502,23 +510,103 @@ class TourController extends Controller
             ], 404);
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Tour Translation
+        |--------------------------------------------------------------------------
+        */
+        if ($lang !== 'en') {
+
+            $translation = $tour->translations
+                ->where('language_code', $lang)
+                ->first();
+
+            if ($translation) {
+
+                $tour->title = $translation->title;
+                $tour->description = $translation->description;
+                $tour->highlights = $translation->highlights;
+                $tour->inclusions = $translation->inclusions;
+                $tour->routes = $translation->routes;
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | SEO Translation
+        |--------------------------------------------------------------------------
+        */
+        if ($tour->seoMeta && $lang !== 'en') {
+
+            $seoTranslation = $tour->seoMeta->translations
+                ->where('language_code', $lang)
+                ->first();
+
+            if ($seoTranslation) {
+
+                $tour->seoMeta->title =
+                    $seoTranslation->title;
+
+                $tour->seoMeta->desc =
+                    $seoTranslation->desc;
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Image URL
+        |--------------------------------------------------------------------------
+        */
         $tour->image_url = $tour->main_banner
             ? asset('uploads/tours/' . $tour->main_banner)
             : null;
 
+        /*
+        |--------------------------------------------------------------------------
+        | Duration
+        |--------------------------------------------------------------------------
+        */
         if ($tour->start_date && $tour->end_date) {
+
             $days = Carbon::parse($tour->start_date)
                 ->diffInDays(Carbon::parse($tour->end_date)) + 1;
+
             $nights = max($days - 1, 0);
+
             $tour->duration = "{$days} Days / {$nights} Nights";
+
         } else {
+
             $tour->duration = null;
         }
 
-        $tour->itineraries->transform(function ($itinerary) {
-            $itinerary->itineraries_image_url = $itinerary->image
-                ? asset('uploads/itineraries/' . $itinerary->image)
-                : null;
+        /*
+        |--------------------------------------------------------------------------
+        | Itinerary Translation
+        |--------------------------------------------------------------------------
+        */
+        $tour->itineraries->transform(function ($itinerary) use ($lang) {
+
+            if ($lang !== 'en') {
+
+                $translation = $itinerary->translations
+                    ->where('language_code', $lang)
+                    ->first();
+
+                if ($translation) {
+
+                    $itinerary->itinerary_title =
+                        $translation->itinerary_title;
+
+                    $itinerary->description =
+                        $translation->description;
+                }
+            }
+
+            $itinerary->itineraries_image_url =
+                $itinerary->image
+                    ? asset('uploads/itineraries/' . $itinerary->image)
+                    : null;
 
             return $itinerary;
         });
@@ -526,6 +614,25 @@ class TourController extends Controller
         return response()->json([
             'status' => true,
             'data' => $tour
+        ]);
+    }
+
+    public function translateTour(Request $request,$id)
+    {
+        $tour = Tour::with(['itineraries','seoMeta'])->findOrFail($id);
+
+        $lang = $request->lang;
+
+        app(
+            \App\Services\TourTranslationService::class
+        )->translate(
+            $tour,
+            $lang
+        );
+
+        return response()->json([
+            'status' => true,
+            'message' => "{$lang} translated"
         ]);
     }
 }

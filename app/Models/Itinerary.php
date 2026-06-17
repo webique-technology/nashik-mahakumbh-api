@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\ItineraryTranslation;
 
 class Itinerary extends Model
 {
@@ -16,5 +17,9 @@ class Itinerary extends Model
     public function tour()
     {
         return $this->belongsTo(Tour::class);
+    }
+    public function translations()
+    {
+        return $this->hasMany(ItineraryTranslation::class);
     }
 }

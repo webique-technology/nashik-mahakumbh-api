@@ -12,8 +12,7 @@ class TourTranslationService
     public function translate(
         Tour $tour,
         string $lang
-    )
-    {
+    ) {
         $translatedHighlights = [];
 
         foreach (
@@ -38,14 +37,13 @@ class TourTranslationService
 
                 $translatedInclusions[] = [
                     'label' =>
-                        TranslationService::translate(
-                            $item['label'] ?? '',
-                            $lang
-                        ),
+                    TranslationService::translate(
+                        $item['label'] ?? '',
+                        $lang
+                    ),
                     'in_icon' =>
-                        $item['in_icon'] ?? null
+                    $item['in_icon'] ?? null
                 ];
-
             } else {
 
                 $translatedInclusions[] =
@@ -76,25 +74,33 @@ class TourTranslationService
             ],
             [
                 'title' =>
-                    TranslationService::translate(
-                        $tour->title,
-                        $lang
-                    ),
+                TranslationService::translate(
+                    $tour->title,
+                    $lang
+                ),
 
                 'description' =>
-                    HtmlTranslationService::translateHtml(
-                        $tour->description,
-                        $lang
-                    ),
+                //  html_entity_decode(
+                //     HtmlTranslationService::translateHtml(
+                //         $tour->description,
+                //         $lang
+                //     ),
+                //     ENT_QUOTES | ENT_HTML5,
+                //     'UTF-8'
+                // ),
+                HtmlTranslationService::translateHtml(
+                    $tour->description,
+                    $lang
+                ),
 
                 'highlights' =>
-                    $translatedHighlights,
+                $translatedHighlights,
 
                 'inclusions' =>
-                    $translatedInclusions,
+                $translatedInclusions,
 
                 'routes' =>
-                    $translatedRoutes
+                $translatedRoutes
             ]
         );
 
@@ -105,23 +111,31 @@ class TourTranslationService
             ItineraryTranslation::updateOrCreate(
                 [
                     'itinerary_id' =>
-                        $itinerary->id,
+                    $itinerary->id,
 
                     'language_code' =>
-                        $lang
+                    $lang
                 ],
                 [
                     'itinerary_title' =>
-                        TranslationService::translate(
-                            $itinerary->itinerary_title,
-                            $lang
-                        ),
+                    TranslationService::translate(
+                        $itinerary->itinerary_title,
+                        $lang
+                    ),
 
                     'description' =>
-                        HtmlTranslationService::translateHtml(
-                            $itinerary->description,
-                            $lang
-                        )
+                    // html_entity_decode(
+                    //     HtmlTranslationService::translateHtml(
+                    //         $itinerary->description,
+                    //         $lang
+                    //     ),
+                    //     ENT_QUOTES | ENT_HTML5,
+                    //     'UTF-8'
+                    // ),
+                    HtmlTranslationService::translateHtml(
+                        $itinerary->description,
+                        $lang
+                    )
                 ]
             );
         }
@@ -139,7 +153,16 @@ class TourTranslationService
                         $lang
                     ),
 
-                    'desc' => HtmlTranslationService::translateHtml(
+                    'desc' =>
+                    // html_entity_decode(
+                    //     HtmlTranslationService::translateHtml(
+                    //         $tour->seoMeta->desc,
+                    //         $lang
+                    //     ),
+                    //     ENT_QUOTES | ENT_HTML5,
+                    //     'UTF-8'
+                    // ),
+                    HtmlTranslationService::translateHtml(
                         $tour->seoMeta->desc,
                         $lang
                     )

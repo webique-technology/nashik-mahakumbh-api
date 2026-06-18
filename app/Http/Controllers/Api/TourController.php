@@ -16,99 +16,160 @@ class TourController extends Controller
 
     public function index(Request $request)
     {
-        // $tours = \App\Models\Tour::with(['itineraries', 'seoMeta'])->paginate(10);
-        $query = \App\Models\Tour::with(['itineraries', 'seoMeta']);
+        $lang = $request->get('lang', 'en');
 
-            // Search by title
-            if ($request->filled('title')) {
-                $query->where('title', 'like', '%' . $request->title . '%');
+        $query = \App\Models\Tour::with([
+            'translations',
+            'itineraries.translations',
+            'seoMeta.translations'
+        ]);
+
+        // Search by title
+        if ($request->filled('title')) {
+            $query->where('title', 'like', '%' . $request->title . '%');
+        }
+
+        // Filter by price range
+        if ($request->filled('price')) {
+
+            if ($request->price == 'below_5000') {
+
+                $query->where('base_price', '<', 5000);
+            } elseif ($request->price == '5000_15000') {
+
+                $query->whereBetween('base_price', [5000, 15000]);
+            } elseif ($request->price == 'above_15000') {
+
+                $query->where('base_price', '>', 15000);
             }
+        }
 
+        $query->latest();
 
-            // Filter by category
-            // if ($request->filled('category')) {
-            //     $query->where('category', $request->category);
-            // }
+        if ($request->filled('limit')) {
 
-            // Filter by price range
-            if ($request->filled('price')) {
+            $tours = $query->take($request->limit)->get();
 
-                if ($request->price == 'below_5000') {
+            $tours->transform(function ($tour) use ($lang) {
 
-                    $query->where('base_price', '<', 5000);
+                if ($lang !== 'en') {
 
-                } elseif ($request->price == '5000_15000') {
+                    $translation = $tour->translations
+                        ->where('language_code', $lang)
+                        ->first();
 
-                    $query->whereBetween('base_price', [5000, 15000]);
+                    if ($translation) {
 
-                } elseif ($request->price == 'above_15000') {
-
-                    $query->where('base_price', '>', 15000);
-                }
-            }
-
-            $query->latest();
-
-            if ($request->filled('limit')) {
-
-                $tours = $query->take($request->limit)->get();
-
-                $tours->transform(function ($tour) {
-
-                    $tour->image_url = $tour->main_banner
-                        ? asset('uploads/tours/' . $tour->main_banner)
-                        : null;
-
-                    if ($tour->start_date && $tour->end_date) {
-                        $days = Carbon::parse($tour->start_date)
-                            ->diffInDays(Carbon::parse($tour->end_date)) + 1;
-                        $nights = max($days - 1, 0);
-                        $tour->duration = "{$days} Days / {$nights} Nights";
-                    } else {
-                        $tour->duration = null;
+                        $tour->title = $translation->title;
+                        $tour->description = $translation->description;
+                        $tour->highlights = $translation->highlights;
+                        $tour->inclusions = $translation->inclusions;
+                        $tour->routes = $translation->routes;
                     }
+                }
 
-
-                    return $tour;
-                });
-
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Tours fetched successfully',
-                    'data' => $tours
-                ]);
-            }
-
-            $tours = $query->paginate(9);
-            
-
-            $tours->getCollection()->transform(function ($tour) {
-                // Main banner image
-                $tour->image_url = $tour->main_banner ? asset('uploads/tours/' . $tour->main_banner) : null;
-                // Itinerary images
-                // $tour->itineraries->transform(function ($itinerary) {
-                //     $itinerary->itineraries_image_url = $itinerary->image ? asset('uploads/itineraries/' . $itinerary->image) : null;
-                //     return $itinerary;
-                // });
-                $tour->itineraries->transform(function ($itinerary) {
-                    $itinerary->itineraries_image_url = $itinerary->image ? '/uploads/itineraries/' . $itinerary->image: null;
-
-                    return $itinerary;
-                });
-
-                $tour->vehicle_categories = VehicleCategory::whereIn('id', $tour->vehicle_category_ids ?? [])->get();
+                $tour->image_url = $tour->main_banner
+                    ? asset('uploads/tours/' . $tour->main_banner)
+                    : null;
 
                 if ($tour->start_date && $tour->end_date) {
+
                     $days = Carbon::parse($tour->start_date)
                         ->diffInDays(Carbon::parse($tour->end_date)) + 1;
+
                     $nights = max($days - 1, 0);
+
                     $tour->duration = "{$days} Days / {$nights} Nights";
                 } else {
+
                     $tour->duration = null;
                 }
 
                 return $tour;
             });
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Tours fetched successfully',
+                'data' => $tours
+            ]);
+        }
+
+        $tours = $query->paginate(9);
+
+        $tours->getCollection()->transform(function ($tour) use ($lang) {
+
+            // Tour Translation
+            if ($lang !== 'en') {
+
+                $translation = $tour->translations
+                    ->where('language_code', $lang)
+                    ->first();
+
+                if ($translation) {
+
+                    $tour->title = $translation->title;
+                    $tour->description = $translation->description;
+                    $tour->highlights = $translation->highlights;
+                    $tour->inclusions = $translation->inclusions;
+                    $tour->routes = $translation->routes;
+                }
+            }
+
+            // Main banner image
+            $tour->image_url = $tour->main_banner
+                ? asset('uploads/tours/' . $tour->main_banner)
+                : null;
+
+            // Itinerary images + translations
+            $tour->itineraries->transform(function ($itinerary) use ($lang) {
+
+                if ($lang !== 'en') {
+
+                    $translation = $itinerary->translations
+                        ->where('language_code', $lang)
+                        ->first();
+
+                    if ($translation) {
+
+                        $itinerary->itinerary_title =
+                            $translation->itinerary_title;
+
+                        $itinerary->description =
+                            $translation->description;
+                    }
+                }
+
+                $itinerary->itineraries_image_url =
+                    $itinerary->image
+                    ? '/uploads/itineraries/' . $itinerary->image
+                    : null;
+
+                return $itinerary;
+            });
+
+            $tour->vehicle_categories =
+                VehicleCategory::whereIn(
+                    'id',
+                    $tour->vehicle_category_ids ?? []
+                )->get();
+
+            if ($tour->start_date && $tour->end_date) {
+
+                $days = Carbon::parse($tour->start_date)
+                    ->diffInDays(Carbon::parse($tour->end_date)) + 1;
+
+                $nights = max($days - 1, 0);
+
+                $tour->duration =
+                    "{$days} Days / {$nights} Nights";
+            } else {
+
+                $tour->duration = null;
+            }
+
+            return $tour;
+        });
 
         return response()->json([
             'status' => true,
@@ -118,7 +179,7 @@ class TourController extends Controller
 
     public function store(Request $request)
     {
-        
+
         $request->validate([
 
             'title' => 'required|string|max:255',
@@ -142,7 +203,7 @@ class TourController extends Controller
 
         if ($request->hasFile('main_banner')) {
 
-            $banner = time().'_'.$request->main_banner->getClientOriginalName();
+            $banner = time() . '_' . $request->main_banner->getClientOriginalName();
 
             $request->main_banner->move(public_path('uploads/tours'), $banner);
         }
@@ -157,7 +218,7 @@ class TourController extends Controller
             // 'location' => $request->location ?? '',
             'highlights' => $request->highlights ?? [],
             'inclusions' => $request->inclusions ?? [],
-            'base_price' => $request->base_price ,
+            'base_price' => $request->base_price,
             'offer_price' => $request->offer_price ?? '',
             'taxes' => $request->taxes ?? '',
             'total_seats' => $request->total_seats ?? '',
@@ -180,7 +241,7 @@ class TourController extends Controller
 
                     $file = $request->file("itineraries.$index.image");
 
-                    $imageName = time().'_'.$file->getClientOriginalName();
+                    $imageName = time() . '_' . $file->getClientOriginalName();
 
                     $file->move(public_path('uploads/itineraries'), $imageName);
                 }
@@ -220,12 +281,12 @@ class TourController extends Controller
                 'message' => 'Tour not found'
             ], 404);
         }
-        $tour->image_url = $tour->main_banner ? '/uploads/tours/' . $tour->main_banner: null;
+        $tour->image_url = $tour->main_banner ? '/uploads/tours/' . $tour->main_banner : null;
         $tour->itineraries->transform(function ($itinerary) {
-                    $itinerary->itineraries_image_url = $itinerary->image ? '/uploads/itineraries/' . $itinerary->image: null;
+            $itinerary->itineraries_image_url = $itinerary->image ? '/uploads/itineraries/' . $itinerary->image : null;
 
-                    return $itinerary;
-         });
+            return $itinerary;
+        });
 
         if ($tour->start_date && $tour->end_date) {
             $days = Carbon::parse($tour->start_date)
@@ -270,7 +331,7 @@ class TourController extends Controller
 
         if ($request->hasFile('main_banner')) {
 
-            $banner = time().'_'.$request->main_banner->getClientOriginalName();
+            $banner = time() . '_' . $request->main_banner->getClientOriginalName();
             $request->main_banner->move(public_path('uploads/tours'), $banner);
             $tour->main_banner = $banner;
         }
@@ -299,16 +360,16 @@ class TourController extends Controller
         if ($request->has('inclusions')) {
             $tour->inclusions = $request->inclusions;
         }
-         if ($request->has('vehicles')) {
+        if ($request->has('vehicles')) {
             $tour->vehicle_category_ids = $request->vehicles;
         }
-         if ($request->has('route')) {
+        if ($request->has('route')) {
             $tour->routes = $request->route;
         }
 
         $tour->save();
 
-       if ($request->itineraries) {
+        if ($request->itineraries) {
 
             $existingIds = [];
 
@@ -321,7 +382,7 @@ class TourController extends Controller
 
                     $file = $request->file("itineraries.$index.image");
 
-                    $imageName = time().'_'.$file->getClientOriginalName();
+                    $imageName = time() . '_' . $file->getClientOriginalName();
 
                     $file->move(
                         public_path('uploads/itineraries'),
@@ -354,7 +415,6 @@ class TourController extends Controller
 
                         $existingIds[] = $itinerary->id;
                     }
-
                 } else {
 
                     // create new itinerary
@@ -451,7 +511,7 @@ class TourController extends Controller
         $tour = Tour::with('itineraries')->find($id);
 
         if (!$tour) {
-            return response()->json(['status' => false,'message' => 'Tour not found'], 404);
+            return response()->json(['status' => false, 'message' => 'Tour not found'], 404);
         }
 
         $this->deleteFile('uploads/tours/' . $tour->main_banner);
@@ -500,8 +560,8 @@ class TourController extends Controller
             'itineraries.translations',
             'seoMeta.translations'
         ])
-        ->where('slug', $slug)
-        ->first();
+            ->where('slug', $slug)
+            ->first();
 
         if (!$tour) {
             return response()->json([
@@ -574,7 +634,6 @@ class TourController extends Controller
             $nights = max($days - 1, 0);
 
             $tour->duration = "{$days} Days / {$nights} Nights";
-
         } else {
 
             $tour->duration = null;
@@ -605,8 +664,8 @@ class TourController extends Controller
 
             $itinerary->itineraries_image_url =
                 $itinerary->image
-                    ? asset('uploads/itineraries/' . $itinerary->image)
-                    : null;
+                ? asset('uploads/itineraries/' . $itinerary->image)
+                : null;
 
             return $itinerary;
         });
@@ -617,9 +676,9 @@ class TourController extends Controller
         ]);
     }
 
-    public function translateTour(Request $request,$id)
+    public function translateTour(Request $request, $id)
     {
-        $tour = Tour::with(['itineraries','seoMeta'])->findOrFail($id);
+        $tour = Tour::with(['itineraries', 'seoMeta'])->findOrFail($id);
 
         $lang = $request->lang;
 

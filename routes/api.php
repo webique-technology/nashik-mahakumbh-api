@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AdminAuthController;
 use App\Http\Controllers\Api\TourController;
@@ -96,91 +97,95 @@ Route::prefix('vehicle-enquiries')->group(function () {
 Route::middleware('api.language')->group(function () {
 
     Route::get('/sliders', [SliderController::class, 'index']);
-
 });
 
 
 // Admin
 Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/profile', function (\Illuminate\Http\Request $request) {
-            return $request->user();
-        });
+    Route::get('/profile', function (\Illuminate\Http\Request $request) {
+        return $request->user();
+    });
 
-        Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 
-        //tours
-        Route::post('/tours', [TourController::class, 'store']);
-        Route::post('/tours/{id}', [TourController::class, 'update']);
-        Route::delete('/tours/{id}', [TourController::class, 'destroy']);
-
-
-        //vehicles
-        Route::post('/vehicles', [VehicleController::class, 'store']);
-        Route::post('/vehicles/{id}', [VehicleController::class, 'update']);
-        Route::delete('/vehicles/{id}', [VehicleController::class, 'destroy']);
-
-        //hotels
-        Route::post('/hotels', [HotelController::class, 'store']);
-        Route::post('/hotels/{id}', [HotelController::class, 'update']);
-        Route::delete('/hotels/{id}', [HotelController::class, 'destroy']);
-
-        //blogs
-        Route::post('/blogs', [BlogController::class, 'store']);
-        Route::post('/blogs/{id}', [BlogController::class, 'update']);
-        Route::delete('/blogs/{id}', [BlogController::class, 'destroy']);
-
-        // Privacy Policy
-        Route::post('/privacy-policy', [PolicyController::class, 'savePrivacyPolicy']);
-        // Payment Policy
-        Route::post('/payment-policy', [PolicyController::class, 'savePaymentPolicy']);
-
-        //tour-enquiries
-        Route::get('/tour-enquiries', [TourEnquiryController::class, 'index']);
-        Route::get('/tour-enquiries/{id}', [TourEnquiryController::class, 'show']);
-        Route::delete('/tour-enquiries/{id}', [TourEnquiryController::class, 'destroy']);
-
-        //carousel
-        Route::prefix('carousel')->group(function () {
-            Route::post('/store', [CarouselController::class, 'store']);
-            Route::post('/update/{id}', [CarouselController::class, 'update']);
-            Route::delete('/delete/{id}', [CarouselController::class, 'destroy']);
-        });
-
-        //videos
-        Route::prefix('videos')->group(function () {
-            Route::post('/store', [VideoController::class, 'store']);
-            Route::post('/update/{id}', [VideoController::class, 'update']);
-            Route::delete('/delete/{id}', [VideoController::class, 'destroy']);
-        });
-
-        //hotel-enquiries
-        Route::prefix('hotel-enquiries')->group(function () {
-            Route::get('/', [HotelEnquiryController::class, 'index']);
-            Route::get('/{id}', [HotelEnquiryController::class, 'show']);
-            Route::post('/update/{id}', [HotelEnquiryController::class, 'update']);
-            Route::delete('/delete/{id}', [HotelEnquiryController::class, 'destroy']);
-        });
-
-        //vehicle-enquiries
-        Route::prefix('vehicle-enquiries')->group(function () {
-            Route::get('/', [VehicleEnquiryController::class, 'index']);
-            Route::get('/{id}', [VehicleEnquiryController::class, 'show']);
-            Route::post('/update/{id}', [VehicleEnquiryController::class, 'update']);
-            Route::delete('/delete/{id}', [VehicleEnquiryController::class, 'destroy']);
-        });
-
-        //contact-us
-        Route::get('/contact-us', [ContactUsController::class, 'index']);
-        // Route::get('/contact-us/{id}', [ContactUsController::class, 'show']);
-        // Route::delete('/contact-us/{id}', [ContactUsController::class, 'destroy']);
+    //tours
+    Route::post('/tours', [TourController::class, 'store']);
+    Route::post('/tours/{id}', [TourController::class, 'update']);
+    Route::delete('/tours/{id}', [TourController::class, 'destroy']);
 
 
-        //sliders
-        Route::post('/sliders', [SliderController::class, 'store']);
-        Route::post('/sliders/{id}', [SliderController::class, 'update']);
-        Route::delete('/sliders/{id}', [SliderController::class, 'destroy']);
-        
-        Route::post('/admin/logout', [AdminAuthController::class, 'logout']);
+    //vehicles
+    Route::post('/vehicles', [VehicleController::class, 'store']);
+    Route::post('/vehicles/{id}', [VehicleController::class, 'update']);
+    Route::delete('/vehicles/{id}', [VehicleController::class, 'destroy']);
+
+    //hotels
+    Route::post('/hotels', [HotelController::class, 'store']);
+    Route::post('/hotels/{id}', [HotelController::class, 'update']);
+    Route::delete('/hotels/{id}', [HotelController::class, 'destroy']);
+
+    //blogs
+    Route::post('/blogs', [BlogController::class, 'store']);
+    Route::post('/blogs/{id}', [BlogController::class, 'update']);
+    Route::delete('/blogs/{id}', [BlogController::class, 'destroy']);
+
+    // Privacy Policy
+    Route::post(
+        '/policies/translate/{id}',
+        [PolicyController::class, 'translatePolicy']
+    );
+
+    Route::post('/privacy-policy', [PolicyController::class, 'savePrivacyPolicy']);
+    // Payment Policy
+    Route::post('/payment-policy', [PolicyController::class, 'savePaymentPolicy']);
+
+    //tour-enquiries
+    Route::get('/tour-enquiries', [TourEnquiryController::class, 'index']);
+    Route::get('/tour-enquiries/{id}', [TourEnquiryController::class, 'show']);
+    Route::delete('/tour-enquiries/{id}', [TourEnquiryController::class, 'destroy']);
+
+    //carousel
+    Route::prefix('carousel')->group(function () {
+        Route::post('/store', [CarouselController::class, 'store']);
+        Route::post('/update/{id}', [CarouselController::class, 'update']);
+        Route::delete('/delete/{id}', [CarouselController::class, 'destroy']);
+    });
+
+    //videos
+    Route::prefix('videos')->group(function () {
+        Route::post('/store', [VideoController::class, 'store']);
+        Route::post('/update/{id}', [VideoController::class, 'update']);
+        Route::delete('/delete/{id}', [VideoController::class, 'destroy']);
+    });
+
+    //hotel-enquiries
+    Route::prefix('hotel-enquiries')->group(function () {
+        Route::get('/', [HotelEnquiryController::class, 'index']);
+        Route::get('/{id}', [HotelEnquiryController::class, 'show']);
+        Route::post('/update/{id}', [HotelEnquiryController::class, 'update']);
+        Route::delete('/delete/{id}', [HotelEnquiryController::class, 'destroy']);
+    });
+
+    //vehicle-enquiries
+    Route::prefix('vehicle-enquiries')->group(function () {
+        Route::get('/', [VehicleEnquiryController::class, 'index']);
+        Route::get('/{id}', [VehicleEnquiryController::class, 'show']);
+        Route::post('/update/{id}', [VehicleEnquiryController::class, 'update']);
+        Route::delete('/delete/{id}', [VehicleEnquiryController::class, 'destroy']);
+    });
+
+    //contact-us
+    Route::get('/contact-us', [ContactUsController::class, 'index']);
+    // Route::get('/contact-us/{id}', [ContactUsController::class, 'show']);
+    // Route::delete('/contact-us/{id}', [ContactUsController::class, 'destroy']);
+
+
+    //sliders
+    Route::post('/sliders', [SliderController::class, 'store']);
+    Route::post('/sliders/{id}', [SliderController::class, 'update']);
+    Route::delete('/sliders/{id}', [SliderController::class, 'destroy']);
+
+    Route::post('/admin/logout', [AdminAuthController::class, 'logout']);
 });
 
 // Route::middleware(['auth:sanctum', 'admin'])->group(function () {
@@ -189,7 +194,5 @@ Route::middleware('auth:sanctum')->group(function () {
 //     });
 // });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
-
-
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

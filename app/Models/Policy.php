@@ -10,4 +10,11 @@ class Policy extends Model
         'type',
         'content'
     ];
+
+    public function translations()
+    {
+        return $this->hasMany(
+            PolicyTranslation::class
+        );
+    }
 }

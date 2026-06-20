@@ -8,7 +8,7 @@ use App\Models\Vehicle;
 
 class VehicleController extends Controller
 {
-    
+
     public function index(Request $request)
     {
         $query = Vehicle::with('category');
@@ -17,7 +17,7 @@ class VehicleController extends Controller
         //     $query->where('category', $request->category);
         // }
         // Search by name
-       
+
         if ($request->filled('name')) {
             $query->where(
                 'name',
@@ -51,7 +51,7 @@ class VehicleController extends Controller
 
         $query->orderBy('id', 'desc');
 
-         if ($request->filled('limit')) {
+        if ($request->filled('limit')) {
 
             $vehicles = $query->take($request->limit)->get();
 
@@ -72,10 +72,10 @@ class VehicleController extends Controller
         }
 
         $vehicles = $query->paginate(9);
-        
-         $vehicles->getCollection()->transform(function ($vehicle) {
+
+        $vehicles->getCollection()->transform(function ($vehicle) {
             // $vehicle->car_image_url  = $vehicle->car_image ? asset('uploads/vehicles/' . $vehicle->car_image) : null;
-            $vehicle->car_image_url = $vehicle->car_image ? '/uploads/vehicles/' . $vehicle->car_image: null;
+            $vehicle->car_image_url = $vehicle->car_image ? '/uploads/vehicles/' . $vehicle->car_image : null;
             return $vehicle;
         });
         return response()->json([
@@ -113,7 +113,7 @@ class VehicleController extends Controller
         if ($request->hasFile('car_image')) {
 
             $file = $request->file('car_image');
-            $imageName = time().'_'.$file->getClientOriginalName();
+            $imageName = time() . '_' . $file->getClientOriginalName();
             $file->move(public_path('uploads/vehicles'), $imageName);
             $vehicle->car_image = $imageName;
         }
@@ -137,7 +137,7 @@ class VehicleController extends Controller
                 'message' => 'Vehicle not found'
             ], 404);
         }
-          $vehicle->car_image_url = $vehicle->car_image
+        $vehicle->car_image_url = $vehicle->car_image
             ? asset('uploads/vehicles/' . $vehicle->car_image)
             : null;
 
@@ -196,14 +196,14 @@ class VehicleController extends Controller
 
             // delete old image
             if (!empty($vehicle->car_image)) {
-                $oldPath = public_path('uploads/vehicles/'.$vehicle->car_image);
+                $oldPath = public_path('uploads/vehicles/' . $vehicle->car_image);
                 if (file_exists($oldPath)) {
                     unlink($oldPath);
                 }
             }
 
             $file = $request->file('car_image');
-            $imageName = time().'_'.$file->getClientOriginalName();
+            $imageName = time() . '_' . $file->getClientOriginalName();
             $file->move(public_path('uploads/vehicles'), $imageName);
 
             $vehicle->car_image = $imageName;
@@ -232,7 +232,7 @@ class VehicleController extends Controller
 
         // delete image
         if (!empty($vehicle->car_image)) {
-            $path = public_path('uploads/vehicles/'.$vehicle->car_image);
+            $path = public_path('uploads/vehicles/' . $vehicle->car_image);
             if (file_exists($path)) {
                 unlink($path);
             }
@@ -243,6 +243,32 @@ class VehicleController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Vehicle deleted successfully'
+        ]);
+    }
+
+    public function chatbotVehicles()
+    {
+        $vehicles = \App\Models\Vehicle::with('category')
+            ->where('status', 1)
+            ->get();
+
+        $data = $vehicles->map(function ($vehicle) {
+
+            return [
+                'id' => $vehicle->id,
+                'name' => $vehicle->name,
+                'location' => $vehicle->location,
+                'category' => $vehicle->category?->name,
+                'total_seats' => $vehicle->total_seats,
+                'base_price' => $vehicle->base_price,
+                'features' => $vehicle->features,
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'count' => $data->count(),
+            'data' => $data,
         ]);
     }
 }

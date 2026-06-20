@@ -27,6 +27,14 @@ Route::get('/test', function () {
 // Website
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 
+Route::prefix('chatbot')->group(function () {
+    Route::get('/blogs', [BlogController::class, 'chatbotBlogs']);
+    Route::get('/tours', [TourController::class, 'chatbotTours']);
+    Route::get('/vehicles', [VehicleController::class, 'chatbotVehicles']);
+    Route::get('/hotels', [HotelController::class, 'chatbotHotels']);
+
+});
+
 //tours
 Route::post('/tours/translate/{id}', [TourController::class, 'translateTour']);
 

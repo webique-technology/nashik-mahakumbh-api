@@ -676,6 +676,46 @@ class TourController extends Controller
         ]);
     }
 
+    public function chatbotTours()
+    {
+        $tours = \App\Models\Tour::with(['itineraries'])
+            ->where('status', 1)
+            ->get();
+
+        $data = $tours->map(function ($tour) {
+
+            return [
+                'id' => $tour->id,
+                'title' => $tour->title,
+                'description' => strip_tags($tour->description),
+                'location' => $tour->location,
+                'base_price' => $tour->base_price,
+                'offer_price' => $tour->offer_price,
+                'taxes' => $tour->taxes,
+                'total_seats' => $tour->total_seats,
+                'start_date' => $tour->start_date,
+                'end_date' => $tour->end_date,
+                'highlights' => $tour->highlights,
+                'inclusions' => $tour->inclusions,
+                'routes' => $tour->routes,
+                'slug' => $tour->slug,
+
+                'itinerary' => $tour->itineraries->map(function ($item) {
+                    return [
+                        'title' => $item->title,
+                        'description' => strip_tags($item->description ?? ''),
+                    ];
+                })->values(),
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'count' => $data->count(),
+            'data' => $data,
+        ]);
+    }
+
     public function translateTour(Request $request, $id)
     {
         $tour = Tour::with(['itineraries', 'seoMeta'])->findOrFail($id);

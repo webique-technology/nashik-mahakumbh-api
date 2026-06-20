@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Jobs\TranslateBlogJob;
 
-class BlogController extends Controller
+class   BlogController extends Controller
 {
     
     public function index(Request $request)
@@ -315,6 +315,11 @@ class BlogController extends Controller
         return response()->json([
             'data' => $blog
         ]);
+    }
+
+    public function chatbotBlogs(){
+        return Blog::select('id','title','description','category')->get();
+    // ->latest()
     }
 
     public function translateBlog($id)

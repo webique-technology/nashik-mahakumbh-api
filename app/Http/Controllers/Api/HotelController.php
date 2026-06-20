@@ -71,7 +71,6 @@ class HotelController extends Controller
             $hotel->images = collect($hotel->images)->map(function ($image) {
 
                 return asset('uploads/hotels/' . $image);
-
             });
 
             // first image
@@ -127,7 +126,7 @@ class HotelController extends Controller
 
             foreach ($request->file('images') as $file) {
 
-                $imageName = time().'_'.$file->getClientOriginalName();
+                $imageName = time() . '_' . $file->getClientOriginalName();
 
                 $file->move(public_path('uploads/hotels'), $imageName);
 
@@ -230,7 +229,7 @@ class HotelController extends Controller
 
                 foreach ($hotel->images as $oldImage) {
 
-                    $oldPath = public_path('uploads/hotels/'.$oldImage);
+                    $oldPath = public_path('uploads/hotels/' . $oldImage);
 
                     if (file_exists($oldPath)) {
                         unlink($oldPath);
@@ -242,7 +241,7 @@ class HotelController extends Controller
 
             foreach ($request->file('images') as $file) {
 
-                $imageName = time().'_'.$file->getClientOriginalName();
+                $imageName = time() . '_' . $file->getClientOriginalName();
 
                 $file->move(public_path('uploads/hotels'), $imageName);
 
@@ -276,7 +275,7 @@ class HotelController extends Controller
 
             foreach ($hotel->images as $image) {
 
-                $path = public_path('uploads/hotels/'.$image);
+                $path = public_path('uploads/hotels/' . $image);
 
                 if (file_exists($path)) {
                     unlink($path);
@@ -289,6 +288,33 @@ class HotelController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Hotel deleted successfully'
+        ]);
+    }
+
+    public function chatbotHotels()
+    {
+        $hotels = \App\Models\Hotel::get();
+
+        $data = $hotels->map(function ($hotel) {
+
+            return [
+                'id' => $hotel->id,
+                'title' => $hotel->title,
+                'description' => strip_tags($hotel->description),
+                'rating' => $hotel->rating,
+                'category' => $hotel->category,
+                'location' => $hotel->location,
+                'features' => $hotel->features,
+                'meals' => $hotel->meals,
+                'base_price' => $hotel->base_price,
+                'offer_price' => $hotel->offer_price,
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'count' => $data->count(),
+            'data' => $data,
         ]);
     }
 }

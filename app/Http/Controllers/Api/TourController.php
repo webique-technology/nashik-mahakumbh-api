@@ -679,7 +679,6 @@ class TourController extends Controller
     public function chatbotTours()
     {
         $tours = \App\Models\Tour::with(['itineraries'])
-            ->where('status', 1)
             ->get();
 
         $data = $tours->map(function ($tour) {

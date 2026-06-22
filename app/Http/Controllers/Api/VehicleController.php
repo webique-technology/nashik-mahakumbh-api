@@ -249,7 +249,6 @@ class VehicleController extends Controller
     public function chatbotVehicles()
     {
         $vehicles = \App\Models\Vehicle::with('category')
-            ->where('status', 1)
             ->get();
 
         $data = $vehicles->map(function ($vehicle) {

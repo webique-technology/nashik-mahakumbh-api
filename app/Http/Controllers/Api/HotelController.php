@@ -98,6 +98,7 @@ class HotelController extends Controller
             'category' => 'required|string',
             'location' => 'required|string',
             'features' => 'nullable|array',
+            'room_type' => 'nullable|array',
             'meals' => 'nullable|string',
             'base_price' => 'required|numeric',
             'offer_price' => 'nullable|numeric',
@@ -119,6 +120,7 @@ class HotelController extends Controller
         $hotel->offer_price = $request->offer_price;
 
         $hotel->features = $request->features ?? [];
+        $hotel->room_type = $request->room_type ?? [];
 
         $images = [];
 
@@ -185,6 +187,7 @@ class HotelController extends Controller
             'category' => 'sometimes|string',
             'location' => 'sometimes|string',
             'features' => 'nullable|array',
+            'room_type' => 'nullable|array',
             'meals' => 'nullable|string',
             'base_price' => 'sometimes|numeric',
             'offer_price' => 'nullable|numeric',
@@ -211,6 +214,9 @@ class HotelController extends Controller
         }
         if ($request->has('features')) {
             $hotel->features = $request->features;
+        }
+        if ($request->has('room_type')) {
+            $hotel->room_type = $request->room_type;
         }
         if ($request->has('meals')) {
             $hotel->meals = $request->meals;

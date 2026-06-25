@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+// use Illuminate\Support\Facades\Mail;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -13,5 +14,14 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 });
 
+// Route::get('/test-mail', function () {
+
+//     Mail::raw('Laravel Gmail SMTP Working', function ($message) {
+//         $message->to(env('ADMIN_EMAIL'))
+//                 ->subject('SMTP Test');
+//     });
+
+//     return 'Mail Sent Successfully';
+// });
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

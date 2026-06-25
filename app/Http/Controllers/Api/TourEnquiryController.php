@@ -1,9 +1,13 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\TourEnquiry;
 use Illuminate\Http\Request;
+use App\Mail\TourEnquiryMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class TourEnquiryController extends Controller
 {
@@ -12,15 +16,14 @@ class TourEnquiryController extends Controller
     {
         $search = $request->search;
 
-        $query = TourEnquiry::with('tour','vehicleCategory');
+        $query = TourEnquiry::with('tour', 'vehicleCategory');
 
         if ($search) {
             $query->where(function ($q) use ($search) {
 
                 $q->where('full_name', 'LIKE', "%{$search}%")
-                ->orWhere('email', 'LIKE', "%{$search}%")
-                ->orWhere('number_of_travelers', 'LIKE', "%{$search}%");
-
+                    ->orWhere('email', 'LIKE', "%{$search}%")
+                    ->orWhere('number_of_travelers', 'LIKE', "%{$search}%");
             });
         }
 
@@ -54,7 +57,7 @@ class TourEnquiryController extends Controller
         ]);
     }
 
-   
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -69,6 +72,25 @@ class TourEnquiryController extends Controller
         ]);
 
         $enquiry = TourEnquiry::create($validated);
+
+        // Load related data
+        $enquiry->load([
+            'tour',
+            'vehicleCategory'
+        ]);
+
+
+        // Send email to admin
+        try {
+
+            Mail::to(config('mail.admin_email'))
+                ->send(new TourEnquiryMail($enquiry));
+        } catch (\Exception $e) {
+
+            Log::error('Tour enquiry email failed', [
+                'message' => $e->getMessage()
+            ]);
+        }
 
         return response()->json([
             'success' => true,
@@ -94,7 +116,7 @@ class TourEnquiryController extends Controller
         ]);
     }
 
-   
+
     public function destroy($id)
     {
         $enquiry = TourEnquiry::find($id);

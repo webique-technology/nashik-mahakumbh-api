@@ -17,10 +17,12 @@ class Hotel extends Model
         'base_price',
         'offer_price',
         'images',
+        'room_type',
     ];
 
     protected $casts = [
         'features' => 'array',
+        'room_type' => 'array',
         'images' => 'array',
     ];
 }
